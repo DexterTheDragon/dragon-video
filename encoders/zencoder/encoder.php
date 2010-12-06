@@ -1,6 +1,4 @@
 <?php
-?>
-<?php
 class ZencoderEncoder {
 
     function ZencoderEncoder() {
@@ -23,10 +21,12 @@ class ZencoderEncoder {
 
         return $new_rules + $rules;
     }
+
     public function insert_query_vars($vars) {
         array_unshift($vars, 'za', 'zk');
         return $vars;
     }
+
     public function do_page_redirect($wp_query) {
         if (isset($wp_query->query_vars['za'])) {
             switch ($wp_query->query_vars['za']) {
@@ -38,57 +38,53 @@ class ZencoderEncoder {
             exit;
         }
     }
+
     private function _handle_incoming_video($token) {
         if (!empty($_POST)) {
             // $savedtoken = get_option('zencoder_token');
             $savedtoken = '9a4e65ac114cbfda975e9e2b658ecd91';
 
             if ($token == $savedtoken) {
+                require_once(ABSPATH . 'wp-admin/includes/file.php');
                 require_once("zencoder-php/Zencoder.php");
                 $notification = ZencoderOutputNotification::catch_and_parse();
-                // var_dump($notification);
-                // var_dump("zencoder_job_{$notification->output->id}");
-                $attachment = get_option("zencoder_job_{$notification->output->id}");
-                // var_dump(get_option("zencoder_job_{$notification->output->id}"));
-                require_once(ABSPATH . 'wp-admin/includes/file.php');
                 $tmp = download_url($notification->output->url);
-                // var_dump($tmp);
-                // unlink($tmp);
+
+                $attachment = get_option("zencoder_job_{$notification->output->id}");
+
                 $url_info = parse_url($notification->output->url);
                 $name = basename($url_info['path']);
-                // var_dump($name);
+
                 $info = pathinfo($name);
                 $ext = $info['extension'];
                 $attachment_id = $attachment['attachment_id'];
-                // var_dump(get_post($attachment['attachment_id']));
+
                 $metadata = wp_get_attachment_metadata($attachment['attachment_id']);
                 $size = isset($metadata['sizes'][$attachment['size']]) ? $attachment['size'] : 'original';
-                // var_dump($size);
-                $video_info = DragonVideo::get_video_info($tmp);
-                $metadata['sizes'][$size]['height'] = $video_info['height'];
-                $suffix = "{$metadata['sizes'][$size]['width']}x{$metadata['sizes'][$size]['height']}";
+
+
                 $file = get_attached_file($attachment_id);
-                // var_dump($file);
                 $info = pathinfo($file);
                 $dir = $info['dirname'];
-                $ext2 = $info['extension'];
-                $name = basename($file, ".{$ext2}");
-                // var_dump($name);
-                $destfilename = "{$dir}/{$name}-{$suffix}.{$ext}";
-                // var_dump($destfilename);
+                $info = pathinfo($metadata['sizes'][$size]['file'][$ext]);
+                $name = $info['filename'];
+
+                $destfilename = "{$dir}/{$metadata['sizes'][$size]['file'][$ext]}";
+
                 rename($tmp, $destfilename);
-                $metadata['sizes'][$size]['file'] = "{$name}-{$suffix}";
+
                 $details = new ZencoderRequest("https://app.zencoder.com/api/jobs/{$notification->job->id}", $this->API_KEY);
 
                 $thumb = download_url($details->results['job']['thumbnails'][0]['url']);
                 $url_info = parse_url($details->results['job']['thumbnails'][0]['url']);
                 $fname = basename($url_info['path']);
-                // var_dump($name);
                 $info = pathinfo($fname);
                 $ext = $info['extension'];
-                $destfilename = "{$dir}/{$name}-{$suffix}.{$ext}";
+
+
+                $destfilename = "{$dir}/{$name}.{$ext}";
                 rename($thumb, $destfilename);
-                $metadata['sizes'][$size]['thumbnail'] = "{$name}-{$suffix}.{$ext}";
+                $metadata['sizes'][$size]['poster'] = "{$name}.{$ext}";
 
                 wp_update_attachment_metadata($attachment_id, $metadata);
             }
@@ -97,7 +93,7 @@ class ZencoderEncoder {
         }
     }
 
-    function make_encodings($attachment_id, $file, $width, $height, $crop) {
+    function make_encodings($meta, $attachment_id, $file) {
         $file = str_replace(WP_CONTENT_DIR, WP_CONTENT_URL, $file);
         require_once("zencoder-php/Zencoder.php");
         // New Encoding Job
@@ -107,7 +103,7 @@ class ZencoderEncoder {
             'output' => array(
                 array(
                     'video_codec' => 'h264',
-                    'width' => $width,
+                    'width' => $meta['width'],
                     'watermark' => array(
                         'url' => $this->WATERMARK_URL,
                         'width' => '50%',
@@ -121,7 +117,7 @@ class ZencoderEncoder {
                 ),
                 array(
                     'video_codec' => 'theora',
-                    'width' => $width,
+                    'width' => $meta['width'],
                     'watermark' => array(
                         'url' => $this->WATERMARK_URL,
                         'width' => '50%',
@@ -142,9 +138,10 @@ class ZencoderEncoder {
             foreach ( $encoding_job->outputs as $o ) {
                 add_option("zencoder_job_{$o->id}", array(
                     'attachment_id' => $attachment_id,
-                    'size' => $width,
+                    'size' => $meta['width'],
                 ));
             }
+
             return true;
         } else {
             return false;

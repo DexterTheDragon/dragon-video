@@ -17,7 +17,7 @@ define('FFMPEG_BINARY', '/usr/bin/ffmpeg');
 class DragonVideo {
 
     function DragonVideo() {
-        $this->WIDTHS = array('original', 480);
+        $this->WIDTHS = array(480);
         $this->VIDEO_BASE_PATH = WP_CONTENT_DIR . "/uploads/"; #xxx: update references to this with the width dir
         $this->VIDEO_BASE_URL = WP_CONTENT_URL . "/uploads/"; #xxx: dito ^
 
@@ -49,15 +49,27 @@ class DragonVideo {
         $sizes = array();
         foreach ( $this->WIDTHS as $s ) {
             $sizes[$s] = array( 'width' => '', 'height' => '', 'crop' => FALSE );
-            if ( $s == 'original' ) {
-                $sizes[$s]['width'] = $metadata['width'];
-            } else {
-                $sizes[$s]['width'] = $s;
-            }
+            $sizes[$s]['width'] = $s;
         }
 
+        $size = 'original';
+        $resized = $this->make_encodings($attachment_id, $file, $metadata['width'], $metadata['height'], false);
+        if ( $resized )
+            $metadata['sizes'][$size] = $resized;
+
+
+        $orig_w = $metadata['width'];
+        $orig_h = $metadata['height'];
         foreach ($sizes as $size => $size_data ) {
-            $resized = $this->make_encodings($attachment_id, $file, $size_data['width'], $size_data['height'], $size_data['crop']);
+            $max_w = $size_data['width'];
+            $max_h = $size_data['height'];
+            $crop  = $size_data['crop'];
+            $dims = image_resize_dimensions($orig_w, $orig_h, $max_w, $max_h, $crop);
+            if ( !$dims )
+                continue;
+            list($dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h) = $dims;
+
+            $resized = $this->make_encodings($attachment_id, $file, $dst_w, $dst_h, $crop);
             if ( $resized )
                 $metadata['sizes'][$size] = $resized;
         }
@@ -71,35 +83,32 @@ class DragonVideo {
         $dir = $info['dirname'];
         $ext = $info['extension'];
         $name = basename($file, ".{$ext}");
-        do_action('dragon_video_encode', $attachment_id, $file, $width, $height, $crop);
-        $return = array(
+        $suffix = "{$width}x{$height}";
+        $files = array(
+            'mp4' => "{$name}-{$suffix}.mp4",
+            'ogg' => "{$name}-{$suffix}.ogg",
+        );
+        $meta = array(
             'width' => $width,
             'height' => $height,
-            'file' => $name,
-            'formats' => array('mp4', 'ogg'),
-            'state' => 'processing',
+            'file' => $files,
+            'poster' => '',
         );
-        return $return;
+
+        do_action('dragon_video_encode', $meta, $attachment_id, $file);
+        return $meta;
     }
 
     function delete_attachment($postid) {
         $src = get_attached_file($postid);
-        $info = pathinfo($src);
-        $file_extensions = array('.ogg', '.mp4', '.jpg', '.ogg.log', '.mp4.log', '.jpg.log');
-        foreach ($this->WIDTHS as $w) {
-            $base = $this->VIDEO_BASE_PATH . $w . "/" . $info['filename'];
-            foreach ($file_extensions as $ext) {
-                $file_path = $base . $ext;
-                if (file_exists($file_path)) {
-                    unlink($file_path);
-                }
-            }
-        }
         $metadata = wp_get_attachment_metadata($postid);
         foreach ( $metadata['sizes'] as $size ) {
-            $file = dirname($src).'/'.$size['file'];
-            foreach ( $size['formats'] as $ext ) {
-                unlink($file.'.'.$ext);
+            $dir = dirname($src);
+            if ( !empty($size['poster']) ) {
+                @unlink($dir.'/'.$size['poster']);
+            }
+            foreach ( $size['file'] as $file ) {
+                @unlink($dir.'/'.$file);
             }
         }
     }
@@ -117,20 +126,18 @@ class DragonVideo {
             return true;
     }
 
-    function video_embed($post, $width_index) {
-        $media_meta = wp_get_attachment_metadata($post->ID);
-        $src = get_attached_file($post->ID);
-        $srcp = pathinfo($src);
-        $url = str_replace(WP_CONTENT_DIR, WP_CONTENT_URL, $srcp['dirname']);
+    function video_embed($post, $size = '480') {
+        $meta = $this->get_video_for_size($post->ID, $size);
+        $file_url = wp_get_attachment_url($post->ID);
+        $url = str_replace(basename($file_url), '', $file_url);
 
-        $width = $this->WIDTHS[$width_index];
-        $filename = $media_meta['sizes'][$width]['file'];
+        $filename = $meta['file'];
 
-        $poster = $url .'/'. $media_meta['sizes'][$width]['thumbnail'];
-        $mp4    = $url . "/" . $filename . ".mp4";
-        $ogg    = $url . "/" . $filename . ".ogg";
-        $height = $media_meta['sizes'][$width]['height'];
-        $width  = $media_meta['sizes'][$width]['width'];
+        $poster = $url . $meta['poster'];
+        $mp4    = $url . $meta['file']['mp4'];
+        $ogg    = $url . $meta['file']['ogg'];
+        $height = $meta['height'];
+        $width  = $meta['width'];
         $video = compact('width', 'height', 'poster', 'mp4', 'ogg');
         $html = <<< HTML
 <!-- Begin Video -->
@@ -157,7 +164,7 @@ HTML;
         if ( !$post = get_post($attr[0]) )
             return "Video $attr[0] Not Found";
         $post = get_post($attr[0]);
-        return $this->video_embed($post, 1, false);
+        return $this->video_embed($post);
     }
 
     function video_send_to_editor_shortcode($html, $post_id, $attachment) {
@@ -185,27 +192,12 @@ HTML;
         return array('width' => $width, 'height' => $height, 'duration' => $total_seconds);
     }
 
-    function completed($post) {
-        $src = get_attached_file($post->ID);
-        $srcp = pathinfo($src);
-        $completed = true;
-        foreach ($this->WIDTHS as $w){
-            $srcbase = $this->VIDEO_BASE_PATH . $w . "/" . $srcp['filename'];
-            if (file_exists($srcbase . ".ogg") && file_exists($srcbase . ".jpg") &&
-                file_exists($srcbase . ".mp4")){
-            } else {
-                $completed = false;
-            }
-        }
-        return $completed;
-    }
-
     function show_video_fields_to_edit($fields, $post) {
         if ( !$this->is_video( $post ) ) {
             return $fields;
         }
         unset($fields['url']);
-        $video_html = $this->video_embed($post, 0, true);
+        $video_html = $this->video_embed($post);
         $video_html = '<p>'.__('Shortcode for embedding: ' ).$this->video_send_to_editor_shortcode( '', $post->ID, '' ).'</p>'.$video_html;
 
         $fields['video-preview'] = array(
@@ -217,9 +209,35 @@ HTML;
         return $fields;
     }
 
+    function get_video_for_size($post_id, $size='thumbnail') {
+        if ( !is_array( $imagedata = wp_get_attachment_metadata( $post_id ) ) )
+            return false;
 
+        if ( in_array($size, array_keys($imagedata['sizes'])) )
+            return $imagedata['sizes'][$size];
 
+        // if there's only one size no point in going further
+        if ( count(array_keys($imagedata['sizes'])) == 1 ) {
+            $key = array_keys($imagedata['sizes']);
+            return $imagedata['sizes'][$key[0]];
+        }
 
+        $wanted_size = array(480, 320);
+        // get the best one for a specified set of dimensions
+        foreach ( $imagedata['sizes'] as $_size => $data ) {
+            if ( ( $data['width'] == $wanted_size[0] ) || ( $data['height'] == $wanted_size[1] ) ) {
+                return $data;
+            }
+        }
+
+        // if we get here just use one
+        $preferred = array('480', 'original');
+        foreach ( $preferred as $try ) {
+            if ( isset($imagedata['sizes'][$try]) ) {
+                return $imagedata['sizes'][$try];
+            }
+        }
+    }
 
     public function video_gallery($attr) {
         global $post, $wp_locale;
@@ -340,17 +358,11 @@ HTML;
         if ( $text ) {
             $link_text = esc_attr($text);
         } elseif ( ( is_int($size) && $size != 0 ) or ( is_string($size) && $size != 'none' ) or $size != false ) {
-            $media_meta = wp_get_attachment_metadata($_post->ID);
             $src = get_attached_file($_post->ID);
-            $widths = $this->WIDTHS;
-            unset($widths[array_search('original', $widths)]);
-            $widths[] = intval($media_meta['width']);
-            $width = min($widths);
-            $filename = $media_meta['sizes'][$width]['file'];
             $srcp = pathinfo($src);
             $url = str_replace(WP_CONTENT_DIR, WP_CONTENT_URL, $srcp['dirname']);
-            // $poster = $url .'/'.  $filename . ".jpg";
-            $poster = $url .'/'. $media_meta['sizes'][$width]['thumbnail'];
+            $meta = $this->get_video_for_size($_post->ID);
+            $poster = $url .'/'. $meta['poster'];
             $link_text = "<img src='$poster' width='150' height='150' />";
         }
 

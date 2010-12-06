@@ -35,8 +35,7 @@ HTML;
             <param name="allowfullscreen" value="true" />
             <param name="flashvars" value='config={"playlist":["$poster", {"url": "$mp4","autoPlay":false,"autoBuffering":true}]}' />
             <!-- Image Fallback. Typically the same as the poster image. -->
-            <img src="$poster" width="$width" height="$height" alt="Poster Image"
-            title="No video playback capabilities." />
+            <img src="$poster" width="$width" height="$height" alt="Poster Image" title="No video playback capabilities." />
         </object>
     </video>
     <!-- Download links provided for devices that can't play video in the browser. -->
