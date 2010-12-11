@@ -374,7 +374,7 @@ HTML;
         if( trim($link_text) == '' )
             $link_text = $_post->post_title;
 
-        return "<a href='$url' title='$post_title'>$link_text</a>";
+        return "<a href='$url' title='$post_title' class='video_overlay'>$link_text</a>";
     }
 }
 
