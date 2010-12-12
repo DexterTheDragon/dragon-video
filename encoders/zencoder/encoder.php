@@ -50,18 +50,17 @@ class ZencoderEncoder {
                 $notification = ZencoderOutputNotification::catch_and_parse();
                 $tmp = download_url($notification->output->url);
 
-                $attachment = get_option("zencoder_job_{$notification->output->id}");
+                $job_info = get_option("zencoder_job_{$notification->output->id}");
+                $attachment_id = $job_info['attachment_id'];
+                $size = $job_info['size'];
 
                 $url_info = parse_url($notification->output->url);
                 $name = basename($url_info['path']);
 
                 $info = pathinfo($name);
                 $ext = $info['extension'];
-                $attachment_id = $attachment['attachment_id'];
 
-                $metadata = wp_get_attachment_metadata($attachment['attachment_id']);
-                $size = isset($metadata['sizes'][$attachment['size']]) ? $attachment['size'] : 'original';
-
+                $metadata = wp_get_attachment_metadata($attachment_id);
 
                 $file = get_attached_file($attachment_id);
                 $info = pathinfo($file);
@@ -87,13 +86,14 @@ class ZencoderEncoder {
                 $metadata['sizes'][$size]['poster'] = "{$name}.{$ext}";
 
                 wp_update_attachment_metadata($attachment_id, $metadata);
+                delete_option("zencoder_job_{$notification->output->id}");
             }
         } else {
             echo '<strong>ERROR:</strong> no direct access';
         }
     }
 
-    function make_encodings($meta, $attachment_id, $file) {
+    function make_encodings($meta, $file, $attachment_id, $size) {
         $file = str_replace(WP_CONTENT_DIR, WP_CONTENT_URL, $file);
         require_once("zencoder-php/Zencoder.php");
         // New Encoding Job
@@ -138,7 +138,7 @@ class ZencoderEncoder {
             foreach ( $encoding_job->outputs as $o ) {
                 add_option("zencoder_job_{$o->id}", array(
                     'attachment_id' => $attachment_id,
-                    'size' => $meta['width'],
+                    'size' => $size,
                 ));
             }
 

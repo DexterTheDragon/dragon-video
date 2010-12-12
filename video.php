@@ -17,7 +17,11 @@ define('FFMPEG_BINARY', '/usr/bin/ffmpeg');
 class DragonVideo {
 
     function DragonVideo() {
-        $this->WIDTHS = array(480);
+        $this->_SIZE_NAMES = array('medium');
+        $this->_SIZES = array(
+            'medium_video_w' => 480,
+            'medium_video_h' => 720,
+        );
         $this->VIDEO_BASE_PATH = WP_CONTENT_DIR . "/uploads/"; #xxx: update references to this with the width dir
         $this->VIDEO_BASE_URL = WP_CONTENT_URL . "/uploads/"; #xxx: dito ^
 
@@ -47,13 +51,13 @@ class DragonVideo {
         }
 
         $sizes = array();
-        foreach ( $this->WIDTHS as $s ) {
+        foreach ( $this->get_video_sizes() as $s ) {
             $sizes[$s] = array( 'width' => '', 'height' => '', 'crop' => FALSE );
-            $sizes[$s]['width'] = $s;
+            $sizes[$s]['width'] = $this->_SIZES["{$s}_video_w"];
         }
 
         $size = 'original';
-        $resized = $this->make_encodings($attachment_id, $file, $metadata['width'], $metadata['height'], false);
+        $resized = $this->make_encodings($size, $attachment_id, $file, $metadata['width'], $metadata['height'], false);
         if ( $resized )
             $metadata['sizes'][$size] = $resized;
 
@@ -69,16 +73,15 @@ class DragonVideo {
                 continue;
             list($dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h) = $dims;
 
-            $resized = $this->make_encodings($attachment_id, $file, $dst_w, $dst_h, $crop);
+            $resized = $this->make_encodings($size, $attachment_id, $file, $dst_w, $dst_h, $crop);
             if ( $resized )
                 $metadata['sizes'][$size] = $resized;
         }
-        $metadata['encoding_state'] = 'processing';
 
         return $metadata;
     }
 
-    function make_encodings($attachment_id, $file, $width, $height, $crop) {
+    function make_encodings($size, $attachment_id, $file, $width, $height, $crop) {
         $info = pathinfo($file);
         $dir = $info['dirname'];
         $ext = $info['extension'];
@@ -95,7 +98,7 @@ class DragonVideo {
             'poster' => '',
         );
 
-        do_action('dragon_video_encode', $meta, $attachment_id, $file);
+        do_action('dragon_video_encode', $meta, $file, $attachment_id, $size);
         return $meta;
     }
 
@@ -126,7 +129,7 @@ class DragonVideo {
             return true;
     }
 
-    function video_embed($post, $size = '480') {
+    function video_embed($post, $size = 'medium') {
         $meta = $this->get_video_for_size($post->ID, $size);
         $file_url = wp_get_attachment_url($post->ID);
         $url = str_replace(basename($file_url), '', $file_url);
@@ -209,7 +212,11 @@ HTML;
         return $fields;
     }
 
-    function get_video_for_size($post_id, $size='thumbnail') {
+    function get_video_sizes() {
+        return $this->_SIZE_NAMES;
+    }
+
+    function get_video_for_size($post_id, $size='medium') {
         if ( !is_array( $imagedata = wp_get_attachment_metadata( $post_id ) ) )
             return false;
 
@@ -222,7 +229,7 @@ HTML;
             return $imagedata['sizes'][$key[0]];
         }
 
-        $wanted_size = array(480, 320);
+        $wanted_size = array($this->_SIZES["{$size}_video_w"], $this->_SIZES["{$size}_video_h"]);
         // get the best one for a specified set of dimensions
         foreach ( $imagedata['sizes'] as $_size => $data ) {
             if ( ( $data['width'] == $wanted_size[0] ) || ( $data['height'] == $wanted_size[1] ) ) {
@@ -231,7 +238,7 @@ HTML;
         }
 
         // if we get here just use one
-        $preferred = array('480', 'original');
+        $preferred = array('medium', 'original');
         foreach ( $preferred as $try ) {
             if ( isset($imagedata['sizes'][$try]) ) {
                 return $imagedata['sizes'][$try];
