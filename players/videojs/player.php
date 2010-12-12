@@ -20,14 +20,33 @@ HTML;
 
     function show_video($html, $video) {
         extract($video);
+
+        // MP4 Source Supplied
+        if ($mp4) {
+            $mp4_source = '<source src="'.$mp4.'" type="video/mp4">';
+            $mp4_link = '<a href="'.$mp4.'">MP4</a>';
+        }
+
+        // WebM Source Supplied
+        if ($webm) {
+            $webm_source = '<source src="'.$webm.'" type="video/webm">';
+            $webm_link = '<a href="'.$webm.'">WebM</a>';
+        }
+
+        // Ogg source supplied
+        if ($ogg) {
+            $ogg_source = '<source src="'.$ogg.'" type="video/ogg">';
+            $ogg_link = '<a href="'.$ogg.'">Ogg</a>';
+        }
+
         $html = <<< HTML
 <!-- Begin VideoJS -->
 <div class="video-js-box">
     <!-- Using the Video for Everybody Embed Code http://camendesign.com/code/video_for_everybody -->
     <video class="video-js" width="$width" height="$height" controls preload poster="$poster">
-        <source src="$mp4" type='video/mp4' />
-        <!-- <source src="http://video-js.zencoder.com/oceans-clip.webm" type='video/webm; codecs="vp8, vorbis"' /> -->
-        <source src="$ogg" type='video/ogg' />
+        $mp4_source
+        $webm_source
+        $ogg_source
         <!-- Flash Fallback. Use any flash video player here. Make sure to keep the vjs-flash-fallback class. -->
         <object class="vjs-flash-fallback" width="$width" height="$height" type="application/x-shockwave-flash"
             data="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf">
@@ -40,9 +59,9 @@ HTML;
     </video>
     <!-- Download links provided for devices that can't play video in the browser. -->
     <p class="vjs-no-video"><strong>Download Video:</strong>
-        <a href="$mp4">MP4</a>,
-        <!-- <a href="http://video-js.zencoder.com/oceans-clip.webm">WebM</a>, -->
-        <a href="$ogg">Ogg</a><br>
+        $mp4_link
+        $webm_link
+        $ogg_link
         <!-- Support VideoJS by keeping this link. -->
         <a href="http://videojs.com">HTML5 Video Player</a> by VideoJS
     </p>
