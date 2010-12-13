@@ -103,6 +103,9 @@ class DragonVideo {
     }
 
     function delete_attachment($postid) {
+        if ( !$this->is_video($attachment_id) ) {
+            return;
+        }
         $src = get_attached_file($postid);
         $metadata = wp_get_attachment_metadata($postid);
         foreach ( $metadata['sizes'] as $size ) {
