@@ -22,8 +22,6 @@ class DragonVideo {
             'medium_video_w' => 480,
             'medium_video_h' => 720,
         );
-        $this->VIDEO_BASE_PATH = WP_CONTENT_DIR . "/uploads/"; #xxx: update references to this with the width dir
-        $this->VIDEO_BASE_URL = WP_CONTENT_URL . "/uploads/"; #xxx: dito ^
 
         add_filter('attachment_fields_to_edit', array(&$this, 'show_video_fields_to_edit'), 11, 2);
         add_filter('media_send_to_editor', array(&$this,'video_send_to_editor_shortcode'), 10, 3 );
@@ -33,9 +31,6 @@ class DragonVideo {
 
         add_filter('post_gallery', array(&$this, 'video_gallery'));
         add_filter('wp_get_attachment_link', array(&$this, 'wp_get_attachment_link'), 10, 6);
-
-        include 'encoders/zencoder/encoder.php';
-        include 'players/videojs/player.php';
     }
 
     function video_metadata($metadata, $attachment_id) {
