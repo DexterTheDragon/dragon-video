@@ -29,7 +29,7 @@ class DragonVideo {
         add_filter('wp_generate_attachment_metadata', array(&$this, 'video_metadata'), 10, 2);
         add_action('delete_attachment', array(&$this, 'delete_attachment'));
 
-        add_filter('post_gallery', array(&$this, 'video_gallery'));
+        add_filter('post_gallery', array(&$this, 'video_gallery'), 10, 2);
         add_filter('wp_get_attachment_link', array(&$this, 'wp_get_attachment_link'), 10, 6);
     }
 
@@ -261,7 +261,7 @@ HTML;
         }
     }
 
-    public function video_gallery($attr) {
+    public function video_gallery($html, $attr) {
         global $post, $wp_locale;
         // We're trusting author input, so let's at least make sure it looks like a valid orderby statement
         if ( isset( $attr['orderby'] ) ) {
