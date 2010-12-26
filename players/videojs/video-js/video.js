@@ -1,6 +1,6 @@
 /*
 VideoJS - HTML5 Video Player
-v2.0.0
+v2.0.1
 
 This file is part of VideoJS. Copyright 2010 Zencoder, Inc.
 
@@ -217,7 +217,7 @@ VideoJS.flashPlayers.htmlObject = {
         this.triggerResizeListeners();
         return this;
       }
-      return this.element.offsetWidth;
+      return this.element.width;
     },
     height: function(height){
       if (height !== undefined) {
@@ -226,7 +226,7 @@ VideoJS.flashPlayers.htmlObject = {
         this.triggerResizeListeners();
         return this;
       }
-      return this.element.offsetHeight;
+      return this.element.height;
     }
   }
 };
@@ -822,8 +822,9 @@ VideoJS.player.extend({
       this.values.bufferStart = 0;
       this.values.bufferEnd = 0;
     }
-    if (this.video.buffered && this.video.buffered.length > 0 && this.video.buffered.end(0) > this.values.bufferEnd) {
-      this.values.bufferEnd = this.video.buffered.end(0);
+    if (this.video.buffered && this.video.buffered.length > 0) {
+      var newEnd = this.video.buffered.end(0);
+      if (newEnd > this.values.bufferEnd) { this.values.bufferEnd = newEnd; }
     }
     return [this.values.bufferStart, this.values.bufferEnd];
   },
@@ -862,7 +863,7 @@ VideoJS.player.extend({
   supportsFullScreen: function(){
     if(typeof this.video.webkitEnterFullScreen == 'function') {
       // Seems to be broken in Chromium/Chrome
-      if (!navigator.userAgent.match("Chrome")) {
+      if (!navigator.userAgent.match("Chrome") && !navigator.userAgent.match("Mac OS X 10.5")) {
         return true;
       }
     }
@@ -894,17 +895,20 @@ VideoJS.player.newBehavior("player", function(player){
     this.onError(this.playerOnVideoError);
     // Listen for when the video is played
     this.onPlay(this.playerOnVideoPlay);
+    this.onPlay(this.trackCurrentTime);
     // Listen for when the video is paused
     this.onPause(this.playerOnVideoPause);
+    this.onPause(this.stopTrackingCurrentTime);
     // Listen for when the video ends
     this.onEnded(this.playerOnVideoEnded);
     // Set interval for load progress using buffer watching method
-    this.trackCurrentTime();
+    // this.trackCurrentTime();
     this.trackBuffered();
     // Buffer Full
     this.onBufferedUpdate(this.isBufferFull);
   },{
-    playerOnVideoError: function(event){ 
+    playerOnVideoError: function(event){
+      this.log(event);
       this.log(this.video.error);
     },
     playerOnVideoPlay: function(event){ this.hasPlayed = true; },
@@ -918,7 +922,7 @@ VideoJS.player.newBehavior("player", function(player){
     // Buffer watching method for load progress.
     // Used for browsers that don't support the progress event
     trackBuffered: function(){
-      this.bufferedInterval = setInterval(this.triggerBufferedListeners.context(this), 200);
+      this.bufferedInterval = setInterval(this.triggerBufferedListeners.context(this), 500);
     },
     stopTrackingBuffered: function(){ clearInterval(this.bufferedInterval); },
     bufferedListeners: [],
@@ -1351,23 +1355,23 @@ VideoJS.player.newBehavior("fullscreenToggle", function(element){
 /* Big Play Button Behaviors
 ================================================================================ */
 VideoJS.player.newBehavior("bigPlayButton", function(element){
-    if (!this.elements.bigPlayButtons) { 
-      this.elements.bigPlayButtons = [];
+    if (!this.bigPlayButtons) {
+      this.bigPlayButtons = [];
       this.onPlay(this.bigPlayButtonsOnPlay);
       this.onEnded(this.bigPlayButtonsOnEnded);
     }
-    this.elements.bigPlayButtons.push(element);
+    this.bigPlayButtons.push(element);
     this.activateElement(element, "playButton");
   },{
     bigPlayButtonsOnPlay: function(event){ this.hideBigPlayButtons(); },
     bigPlayButtonsOnEnded: function(event){ this.showBigPlayButtons(); },
-    showBigPlayButtons: function(){ 
-      this.each(this.elements.bigPlayButtons, function(element){
+    showBigPlayButtons: function(){
+      this.each(this.bigPlayButtons, function(element){
         element.style.display = "block"; 
       });
     },
-    hideBigPlayButtons: function(){ 
-      this.each(this.elements.bigPlayButtons, function(element){
+    hideBigPlayButtons: function(){
+      this.each(this.bigPlayButtons, function(element){
         element.style.display = "none"; 
       });
     }
@@ -1438,11 +1442,11 @@ VideoJS.player.newBehavior("spinner", function(element){
 /* Subtitles
 ================================================================================ */
 VideoJS.player.newBehavior("subtitlesDisplay", function(element){
-    if (!this.elements.subtitlesDisplays) { 
-      this.elements.subtitlesDisplays = [];
+    if (!this.subtitlesDisplays) { 
+      this.subtitlesDisplays = [];
       _V_.addListener(this.video, "timeupdate", this.subtitlesDisplaysOnVideoTimeUpdate.context(this));
     }
-    this.elements.subtitlesDisplays.push(element);
+    this.subtitlesDisplays.push(element);
   },{
     subtitlesDisplaysOnVideoTimeUpdate: function(){
       // show the subtitles
@@ -1468,7 +1472,7 @@ VideoJS.player.newBehavior("subtitlesDisplay", function(element){
       }
     },
     updateSubtitlesDisplays: function(val){
-      this.each(this.elements.subtitlesDisplays, function(disp){
+      this.each(this.subtitlesDisplays, function(disp){
         disp.innerHTML = val;
       });
     }

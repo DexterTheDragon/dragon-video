@@ -1,6 +1,6 @@
 VideoJS - [HTML5 Video Player](http://videojs.com)
 ==================================================
-Version 2.0.0
+Version 2.0.1
 
 View [VideoJS.com](http://videojs.com) for a demo and overview.
 
@@ -131,6 +131,17 @@ Coming Next
 
 Changelog
 ---------
+2.0.2 ()
+
+- Fix: Bug in Safari for Mac OS 10.5 (Leopard) that was breaking fullscreen.
+
+2.0.1 (2010-11-22)
+
+- Fix: Issue with big play button when multiple videos are on the page.
+- Fix: Optimized play progress tracking.
+- Fix: Optimized buffer progress checking.
+- Fix: Firefox not showing Flash fallback object.
+
 2.0.0 (2010-11-21)
 
 - Feature: Created "behaviors" concept for adding behaviors to elements
