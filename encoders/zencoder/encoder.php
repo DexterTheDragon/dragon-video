@@ -98,7 +98,6 @@ class ZencoderEncoder {
         require_once("zencoder-php/Zencoder.php");
         // New Encoding Job
         $job = array(
-            'test' => 1,
             'input' => $file,
             'output' => array(
                 array(
