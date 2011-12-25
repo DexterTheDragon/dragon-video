@@ -1,10 +1,24 @@
 <?php
 class ZencoderEncoder {
 
+    protected $_messages = array();
+
+    protected $options = array(
+        'api_key' => '',
+        'watermark_url' => '',
+    );
+
+    protected $codecs = array(
+        'webm' => 'vp8',
+        'mp4'  => 'h264',
+        'ogg'  => 'theora',
+    );
+
     function ZencoderEncoder() {
-        $this->API_KEY = '8165fce7ebee2c61bbe6cba04c41abb1';
-        $this->WATERMARK_URL = '';
-        $this->NOTIFICATION_URL = '';
+        register_activation_hook(__FILE__, array(&$this, 'activate'));
+        $this->NOTIFICATION_URL = get_option('siteurl') .'/zencoder/'. get_option('zencoder_token');
+
+        add_action('admin_menu', array(&$this, 'admin_menu'));
 
         add_action('dragon_video_encode', array(&$this, 'make_encodings'), 10, 5);
 
@@ -12,6 +26,20 @@ class ZencoderEncoder {
         add_filter('query_vars',          array(&$this, 'insert_query_vars'));
         add_filter('init', 'flush_rewrite_rules');
         add_action('parse_query', array(&$this, 'do_page_redirect'));
+
+        $this->options = get_option('zencoder_options', $this->options);
+    }
+
+    /**
+     * Plugin installation method
+     */
+    public function activate() {
+        add_option('zencoder_options', $this->options, null, 'no');
+    }
+
+    public function admin_menu() {
+        add_submenu_page('dragonvideo', 'Zencoder', 'Zencoder Options', 'manage_options', 'zencoder', array(&$this, 'options_page'));
+        add_option('zencoder_token', md5(uniqid('', true)), null, 'no');
     }
 
     public function insert_rewrite_rules($rules) {
@@ -34,15 +62,13 @@ class ZencoderEncoder {
                     $this->_handle_incoming_video($wp_query->query_vars['zk']);
                     break;
             }
-
             exit;
         }
     }
 
     private function _handle_incoming_video($token) {
         if (!empty($_POST)) {
-            // $savedtoken = get_option('zencoder_token');
-            $savedtoken = '9a4e65ac114cbfda975e9e2b658ecd91';
+            $savedtoken = get_option('zencoder_token');
 
             if ($token == $savedtoken) {
                 require_once(ABSPATH . 'wp-admin/includes/file.php');
@@ -52,40 +78,49 @@ class ZencoderEncoder {
 
                 $job_info = get_option("zencoder_job_{$notification->output->id}");
                 $attachment_id = $job_info['attachment_id'];
-                $size = $job_info['size'];
-
-                $url_info = parse_url($notification->output->url);
-                $name = basename($url_info['path']);
-
-                $info = pathinfo($name);
-                $ext = $info['extension'];
+                $label = $job_info['size'];
+                $size = substr($label, 0, strpos($label, '-'));
+                $format = substr($label, strpos($label, '-')+1);
 
                 $metadata = wp_get_attachment_metadata($attachment_id);
 
                 $file = get_attached_file($attachment_id);
                 $info = pathinfo($file);
                 $dir = $info['dirname'];
-                $info = pathinfo($metadata['sizes'][$size]['file'][$ext]);
-                $name = $info['filename'];
 
-                $destfilename = "{$dir}/{$metadata['sizes'][$size]['file'][$ext]}";
+                $destfilename = "{$dir}/{$metadata['sizes'][$size]['file'][$format]}";
 
                 rename($tmp, $destfilename);
 
-                $details = new ZencoderRequest("https://app.zencoder.com/api/jobs/{$notification->job->id}", $this->API_KEY);
 
-                $thumb = download_url($details->results['job']['thumbnails'][0]['url']);
-                $url_info = parse_url($details->results['job']['thumbnails'][0]['url']);
-                $fname = basename($url_info['path']);
-                $info = pathinfo($fname);
-                $ext = $info['extension'];
+                if ( empty($metadata['sizes'][$size]['poster']) ) {
+                    $details = new ZencoderRequest("https://app.zencoder.com/api/jobs/{$notification->job->id}", $this->options['api_key']);
 
+                    $info = pathinfo($metadata['sizes'][$size]['file'][$format]);
+                    $name = $info['filename'];
+                    $posters = array();
+                    $number = 0;
+                    foreach ( $details->results['job']['thumbnails'] as $thumbnail ) {
+                        if ( $thumbnail['group_label'] != $label ) continue;
+                        $url = $thumbnail['url'];
+                        $thumb = download_url($url);
+                        $url_info = parse_url($url);
+                        $fname = basename($url_info['path']);
+                        $info = pathinfo($fname);
+                        $ext = $info['extension'];
 
-                $destfilename = "{$dir}/{$name}.{$ext}";
-                rename($thumb, $destfilename);
-                $metadata['sizes'][$size]['poster'] = "{$name}.{$ext}";
+                        $filename = "{$name}-{$number}.{$ext}";
+                        $destfilename = "{$dir}/{$filename}";
+                        rename($thumb, $destfilename);
+                        $posters[] = $filename;
+                        $number++;
+                    }
 
-                wp_update_attachment_metadata($attachment_id, $metadata);
+                    $metadata = wp_get_attachment_metadata($attachment_id);
+                    $metadata['sizes'][$size]['poster'] = $posters[0];
+                    $metadata['sizes'][$size]['posters'] = $posters;
+                    wp_update_attachment_metadata($attachment_id, $metadata);
+                }
                 delete_option("zencoder_job_{$notification->output->id}");
             }
         } else {
@@ -93,51 +128,48 @@ class ZencoderEncoder {
         }
     }
 
-    function make_encodings($meta, $file, $attachment_id, $size) {
+    function make_encodings($file, $attachment_id, $sizes) {
         $file = str_replace(WP_CONTENT_DIR, WP_CONTENT_URL, $file);
         require_once("zencoder-php/Zencoder.php");
         // New Encoding Job
         $job = array(
             'input' => $file,
-            'output' => array(
-                array(
-                    'video_codec' => 'h264',
-                    'width' => $meta['width'],
-                    'watermark' => array(
-                        'url' => $this->WATERMARK_URL,
-                        'width' => '50%',
-                    ),
-                    'notifications' => array(
-                        $this->NOTIFICATION_URL,
-                    ),
-                    'thumbnails' => array(
-                        'number' => 2,
-                    ),
-                ),
-                array(
-                    'video_codec' => 'theora',
-                    'width' => $meta['width'],
-                    'watermark' => array(
-                        'url' => $this->WATERMARK_URL,
-                        'width' => '50%',
-                    ),
-                    'notifications' => array(
-                        $this->NOTIFICATION_URL,
-                    ),
-                    'thumbnails' => array(
-                        'number' => 2,
-                    ),
-                ),
-            ),
-            'api_key' => $this->API_KEY
+            'output' => array(),
+            'api_key' => $this->options['api_key'],
+            'test' => true,
         );
+        foreach ( $sizes as $size => $meta ) {
+            foreach ( DragonVideo::encode_formats() as $format ) {
+                $output = array(
+                    'label' => "{$size}-{$format}",
+                    'video_codec' => $this->codecs[$format],
+                    'width' => $meta['width'],
+                    'notifications' => array(
+                        $this->NOTIFICATION_URL,
+                    ),
+                    'thumbnails' => array(
+                        'number' => 2,
+                        'label' => "{$size}-{$format}",
+                    ),
+                );
+                if ( !empty($this->options['watermark_url']) ) {
+                    $output = array_merge($output, array(
+                        'watermark' => array(
+                            'url' => $this->options['watermark_url'],
+                            'width' => '50%',
+                        ),
+                    ));
+                }
+                $job['output'][] = $output;
+            }
+        }
         $encoding_job = new ZencoderJob($job);
         // Check if it worked
         if ($encoding_job->created) {
             foreach ( $encoding_job->outputs as $o ) {
                 add_option("zencoder_job_{$o->id}", array(
                     'attachment_id' => $attachment_id,
-                    'size' => $size,
+                    'size' => $o->label,
                 ));
             }
 
@@ -145,6 +177,64 @@ class ZencoderEncoder {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Display options page
+     */
+    public function options_page() {
+        // if user clicked "Save Changes" save them
+        if ( isset($_POST['Submit']) ) {
+            foreach ( $this->options as $option => $value ) {
+                if ( array_key_exists($option, $_POST) ) {
+                    $this->options[$option] = $_POST[$option];
+                }
+            }
+            update_option('zencoder_options', $this->options);
+
+            $this->_messages['updated'][] = 'Options updated!';
+        }
+
+        foreach ( $this->_messages as $namespace => $messages ) {
+            foreach ( $messages as $message ) { ?>
+                <div class="<?php echo $namespace; ?>">
+                    <p>
+                        <strong><?php echo $message; ?></strong>
+                    </p>
+                </div>
+                <?php
+            }
+        } ?>
+<div class="wrap">
+    <div id="icon-options-general" class="icon32"><br /></div>
+    <h2>Zencoder Settings</h2>
+    <form method="post" action="">
+        <div id="watermark_text" class="watermark_type">
+            <table class="form-table" style="clear:none; width:auto;">
+                <tr>
+                    <th>API Key</th>
+                    <td>
+                        <input type="text" size="40" name="api_key" value="<?php echo $this->options['api_key']; ?>" /><br />
+                        <span class="description">API key for zencoder.com</span>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Watermark URL:</th>
+                    <td>
+                        <input type="text" size="40" name="watermark_url" value="<?php echo $this->options['watermark_url']; ?>" /><br />
+                        <span class="description">URL to image to apply as watermark</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p class="submit">
+            <input type="submit" name="Submit" class="button-primary" value="Save Changes" />
+        </p>
+
+    </form>
+</div>
+<?php
     }
 }
 
