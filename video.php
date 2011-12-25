@@ -7,21 +7,45 @@ Author: Kevin Carter
 Version: 0.1
 Author URI: http://dexterthedragon.com/
 */
-# TODO: Video should save into uploads folder
+# TODO: Video should save into uploads folder CHECK
 # TODO: Link on page to re-convert video
-# TODO: Custom gallery mixing video and images
-# TODO: Settings page
-
-define('FFMPEG_BINARY', '/usr/bin/ffmpeg');
+# TODO: Custom gallery mixing video and images CHECK
+# TODO: Settings page CHECK
+# TODO: Fix zencoder activation settings
 
 class DragonVideo {
 
+
+    /**
+     * Error messages to diplay
+     *
+     * @var array
+     */
+    protected $_messages = array();
+
+    /**
+     * Array with default options
+     *
+     * @var array
+     */
+    protected $options = array(
+        'formats' => array(
+            'webm' => true,
+            'ogg' => true,
+            'mp4' => true,
+        ),
+        'sizes'   => array(
+            'large'  => array('', ''),
+            'medium' => array(720, 480),
+            'small'  => array(480, 320),
+        ),
+        'ffmpeg_path' => '/usr/bin/ffmpeg',
+        'override_gallery' => true,
+    );
+
     function DragonVideo() {
-        $this->_SIZE_NAMES = array('medium');
-        $this->_SIZES = array(
-            'medium_video_w' => 480,
-            'medium_video_h' => 720,
-        );
+        register_activation_hook(__FILE__, array(&$this, 'activate'));
+        $this->options = get_option('dragon-video', $this->options);
 
         add_filter('attachment_fields_to_edit', array(&$this, 'show_video_fields_to_edit'), 11, 2);
         add_filter('media_send_to_editor', array(&$this,'video_send_to_editor_shortcode'), 10, 3 );
@@ -29,8 +53,24 @@ class DragonVideo {
         add_filter('wp_generate_attachment_metadata', array(&$this, 'video_metadata'), 10, 2);
         add_action('delete_attachment', array(&$this, 'delete_attachment'));
 
-        add_filter('post_gallery', array(&$this, 'video_gallery'), 10, 2);
+        add_action('admin_menu', array(&$this, 'admin_menu'), 1); //high priority so addons can attach to menu
+
+        if ( $this->options['override_gallery'] ) {
+            add_filter('post_gallery', array(&$this, 'video_gallery'), 10, 2);
+        }
         add_filter('wp_get_attachment_link', array(&$this, 'wp_get_attachment_link'), 10, 6);
+    }
+
+    /**
+     * Plugin installation method
+     */
+    public function activate() {
+        add_option('dragon-video', $this->options, null, 'no');
+    }
+
+    public function admin_menu() {
+        add_menu_page('Dragon Video', 'DragonVideo', 'manage_options', 'dragonvideo', array(&$this, 'options_page'), null, null );
+        add_submenu_page('dragonvideo', 'Dragon Video', 'Dragon Video', 'manage_options', 'dragonvideo', array(&$this, 'options_page'));
     }
 
     function video_metadata($metadata, $attachment_id) {
@@ -48,11 +88,11 @@ class DragonVideo {
         $sizes = array();
         foreach ( $this->get_video_sizes() as $s ) {
             $sizes[$s] = array( 'width' => '', 'height' => '', 'crop' => FALSE );
-            $sizes[$s]['width'] = $this->_SIZES["{$s}_video_w"];
+            $sizes[$s]['width'] = $this->options['sizes'][$s][0];
         }
 
         $size = 'original';
-        $resized = $this->make_encodings($size, $attachment_id, $file, $metadata['width'], $metadata['height'], false);
+        $resized = $this->make_encodings($size, $attachment_id, $file, (int)$metadata['width'], (int)$metadata['height'], false);
         if ( $resized )
             $metadata['sizes'][$size] = $resized;
 
@@ -73,6 +113,7 @@ class DragonVideo {
                 $metadata['sizes'][$size] = $resized;
         }
 
+        do_action('dragon_video_encode', $file, $attachment_id, $metadata['sizes']);
         return $metadata;
     }
 
@@ -82,10 +123,12 @@ class DragonVideo {
         $ext = $info['extension'];
         $name = basename($file, ".{$ext}");
         $suffix = "{$width}x{$height}";
-        $files = array(
-            'mp4' => "{$name}-{$suffix}.mp4",
-            'ogg' => "{$name}-{$suffix}.ogg",
-        );
+        $files = array();
+        foreach ( $this->options['formats'] as $format => $active ) {
+            if ( $active ) {
+                $files[$format] = "{$name}-{$suffix}.{$format}";
+            }
+        }
         $meta = array(
             'width' => $width,
             'height' => $height,
@@ -93,7 +136,6 @@ class DragonVideo {
             'poster' => '',
         );
 
-        do_action('dragon_video_encode', $meta, $file, $attachment_id, $size);
         return $meta;
     }
 
@@ -193,7 +235,7 @@ HTML;
     }
 
     function get_video_info($src) {
-        $cmd = FFMPEG_BINARY . ' -i ' . $src  . ' 2>&1';
+        $cmd = $this->options['ffmpeg_path'] . ' -i ' . $src  . ' 2>&1';
         $lines = array();
         exec($cmd, $lines);
         $width = $height = 0;
@@ -228,7 +270,7 @@ HTML;
     }
 
     function get_video_sizes() {
-        return $this->_SIZE_NAMES;
+        return array_keys($this->options['sizes']);
     }
 
     function get_video_for_size($post_id, $size='medium') {
@@ -244,7 +286,7 @@ HTML;
             return $imagedata['sizes'][$key[0]];
         }
 
-        $wanted_size = array($this->_SIZES["{$size}_video_w"], $this->_SIZES["{$size}_video_h"]);
+        $wanted_size = array($this->options['sizes'][$size][0], $this->options['sizes'][$size][1]);
         // get the best one for a specified set of dimensions
         foreach ( $imagedata['sizes'] as $_size => $data ) {
             if ( ( $data['width'] == $wanted_size[0] ) || ( $data['height'] == $wanted_size[1] ) ) {
@@ -397,6 +439,101 @@ HTML;
             $link_text = $_post->post_title;
 
         return "<a href='$url' title='$post_title' class='video_overlay'>$link_text</a>";
+    }
+
+    /**
+     * Display options page
+     */
+    public function options_page() {
+        // if user clicked "Save Changes" save them
+        if ( isset($_POST['Submit']) ) {
+            foreach ( $this->options as $option => $value ) {
+                if ( array_key_exists($option, $_POST) ) {
+                    $this->options[$option] = $_POST[$option];
+                }
+            }
+            update_option('dragon-video', $this->options);
+
+            $this->_messages['updated'][] = 'Options updated!';
+        }
+
+        foreach ( $this->_messages as $namespace => $messages ) {
+            foreach ( $messages as $message ) { ?>
+                <div class="<?php echo $namespace; ?>">
+                    <p>
+                        <strong><?php echo $message; ?></strong>
+                    </p>
+                </div>
+                <?php
+            }
+        } ?>
+<div class="wrap">
+    <div id="icon-options-general" class="icon32"><br /></div>
+    <h2>Dragon Video Settings</h2>
+    <form method="post" action="">
+        <div id="watermark_text" class="watermark_type">
+            <table class="form-table" style="clear:none; width:auto;">
+                <tr>
+                    <th>FFmpeg path</th>
+                    <td>
+                    <input type="text" size="40" name="ffmpeg_path" value="<?php echo $this->options['ffmpeg_path']; ?>" /><br />
+                    <span class="description">FFmpeg needed for video info discovery.</span>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Formats:</th>
+                    <td>
+                        <?php foreach ( $this->options['formats'] as $format => $checked ) { ?>
+                            <label>
+                                <input name="formats[<?php echo $format; ?>]" type="hidden" id="formats_<?php echo $format; ?>_0" value="0" />
+                                <input name="formats[<?php echo $format; ?>]" type="checkbox" id="formats_<?php echo $format; ?>" value="1"<?php echo $checked ? ' checked="checked"' : null; ?> />
+                                <?php echo $format; ?>
+                            </label>
+                            <br />
+                        <?php } ?>
+                        <span class="description">Which formats to encode to.</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Override WordPress Gallery</th>
+                    <td>
+                    <input name="override_gallery" type="checkbox" id="override_gallery" value="1"<?php echo $this->options['override_gallery'] ? ' checked="checked"' : null; ?> />
+                    <span class="description">Override the WordPress gallery to include videos and images.</span>
+                    </td>
+                </tr>
+            </table>
+            <h3>Video Sizes</h3>
+            <p>Maximum sizes to encode videos to. Leave blank to skip size.</p>
+            <table class="form-table" style="clear:none; width:auto;">
+                <?php foreach ( $this->options['sizes'] as $name => $size ) { ?>
+                    <tr valign="top">
+                        <th scope="row"><?php echo ucfirst($name); ?>:</th>
+                        <td>
+                            <label>
+                                Max Width <input name="sizes[<?php echo $name; ?>][0]" type="text" id="size_<?php echo $name; ?>" value="<?php echo $size[0]; ?>" class="small-text" />
+                            </label>
+                            <label>
+                                Max Height <input name="sizes[<?php echo $name; ?>][1]" type="text" id="size_<?php echo $name; ?>" value="<?php echo $size[1]; ?>" class="small-text" />
+                            </label>
+                        </td>
+                    </tr>
+                <?php } ?>
+            </table>
+        </div>
+
+        <p class="submit">
+            <input type="submit" name="Submit" class="button-primary" value="Save Changes" />
+        </p>
+
+    </form>
+</div>
+<?php
+    }
+
+    static function encode_formats() {
+        global $dragonvideo;
+        $options = $dragonvideo->options;
+        return array_keys(array_filter($options['formats'], create_function('$o', 'return $o;')));
     }
 }
 
