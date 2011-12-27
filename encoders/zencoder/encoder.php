@@ -11,7 +11,7 @@ class ZencoderEncoder {
     protected $codecs = array(
         'webm' => 'vp8',
         'mp4'  => 'h264',
-        'ogg'  => 'theora',
+        'ogv'  => 'theora',
     );
 
     function ZencoderEncoder() {

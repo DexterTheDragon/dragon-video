@@ -31,7 +31,7 @@ class DragonVideo {
     protected $options = array(
         'formats' => array(
             'webm' => true,
-            'ogg' => true,
+            'ogv' => true,
             'mp4' => true,
         ),
         'sizes'   => array(
@@ -180,31 +180,12 @@ class DragonVideo {
         $height = $meta['height'];
         $width  = $meta['width'];
 
+        $mp4_source = $flash_fallback = $webm_source = $ogv_source = null;
         // MP4 Source Supplied
-        if ($meta['file']['mp4']) {
+        if ( isset($meta['file']['mp4']) ) {
             $mp4 = $url . $meta['file']['mp4'];
             $mp4_source = '<source src="'.$mp4.'" type="video/mp4">';
-        }
-
-        // WebM Source Supplied
-        if ($meta['file']['webm']) {
-            $webm = $url . $meta['file']['webm'];
-            $webm_source = '<source src="'.$webm.'" type="video/webm">';
-        }
-
-        // Ogg source supplied
-        if ($meta['file']['ogg']) {
-            $ogg = $url . $meta['file']['ogg'];
-            $ogg_source = '<source src="'.$ogg.'" type="video/ogg">';
-        }
-
-        $html = <<< HTML
-<!-- Begin Video -->
-<!-- Using the Video for Everybody Embed Code http://camendesign.com/code/video_for_everybody -->
-<video width="$width" height="$height" controls preload poster="$poster">
-    $mp4_source
-    $webm_source
-    $ogg_source
+            $flash_fallback = <<<HTML
     <!-- Flash Fallback. -->
     <object width="$width" height="$height" type="application/x-shockwave-flash" data="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf">
         <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" />
@@ -213,10 +194,33 @@ class DragonVideo {
         <!-- Image Fallback. Typically the same as the poster image. -->
         <img src="$poster" width="$width" height="$height" alt="Poster Image" title="No video playback capabilities." />
     </object>
+HTML;
+        }
+
+        // WebM Source Supplied
+        if ( isset($meta['file']['webm']) ) {
+            $webm = $url . $meta['file']['webm'];
+            $webm_source = '<source src="'.$webm.'" type="video/webm">';
+        }
+
+        // Ogg source supplied
+        if ( isset($meta['file']['ogv']) ) {
+            $ogv = $url . $meta['file']['ogv'];
+            $ogv_source = '<source src="'.$ogv.'" type="video/ogg">';
+        }
+
+        $html = <<< HTML
+<!-- Begin Video -->
+<!-- Using the Video for Everybody Embed Code http://camendesign.com/code/video_for_everybody -->
+<video width="$width" height="$height" controls preload poster="$poster">
+    $mp4_source
+    $webm_source
+    $ogv_source
+    $flash_fallback
 </video>
 <!-- End Video -->
 HTML;
-        $video = compact('width', 'height', 'poster', 'mp4', 'ogg', 'webm');
+        $video = compact('width', 'height', 'poster', 'mp4', 'ogv', 'webm');
         return apply_filters('dragon_video_player', $html, $video);
     }
 
