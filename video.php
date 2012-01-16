@@ -7,11 +7,7 @@ Author: Kevin Carter
 Version: 0.1
 Author URI: http://dexterthedragon.com/
 */
-# TODO: Video should save into uploads folder CHECK
 # TODO: Link on page to re-convert video
-# TODO: Custom gallery mixing video and images CHECK
-# TODO: Settings page CHECK
-# TODO: Fix zencoder activation settings
 
 class DragonVideo {
 
@@ -30,9 +26,9 @@ class DragonVideo {
      */
     protected $options = array(
         'formats' => array(
+            'mp4' => true,
             'webm' => true,
             'ogv' => true,
-            'mp4' => true,
         ),
         'sizes'   => array(
             'large'  => array('', ''),
