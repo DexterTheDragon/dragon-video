@@ -140,7 +140,7 @@ class DragonVideo {
     }
 
     function delete_attachment($postid) {
-        if ( !$this->is_video($attachment_id) ) {
+        if ( !$this->is_video($postid) ) {
             return;
         }
         $src = get_attached_file($postid);
@@ -149,6 +149,11 @@ class DragonVideo {
             $dir = dirname($src);
             if ( !empty($size['poster']) ) {
                 @unlink($dir.'/'.$size['poster']);
+            }
+            if ( !empty($size['posters']) ) {
+                foreach ( $size['posters'] as $file ) {
+                    @unlink($dir.'/'.$file);
+                }
             }
             foreach ( $size['file'] as $file ) {
                 @unlink($dir.'/'.$file);
