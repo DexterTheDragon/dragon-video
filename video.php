@@ -233,7 +233,11 @@ HTML;
         if ( !$post = get_post($attr[0]) )
             return "Video $attr[0] Not Found";
         $post = get_post($attr[0]);
-        return $this->video_embed($post);
+        $size = 'medium';
+        if ( isset($attr['size']) ) {
+            $size = $attr['size'];
+        }
+        return $this->video_embed($post, $size);
     }
 
     function video_send_to_editor_shortcode($html, $post_id, $attachment) {
