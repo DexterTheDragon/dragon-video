@@ -35,11 +35,11 @@ class ZencoderEncoder {
      */
     public function activate() {
         add_option('zencoder_options', $this->options, null, 'no');
+        add_option('zencoder_token', md5(uniqid('', true)), null, 'no');
     }
 
     public function admin_menu() {
         add_submenu_page('dragonvideo', 'Zencoder', 'Zencoder Options', 'manage_options', 'zencoder', array(&$this, 'options_page'));
-        add_option('zencoder_token', md5(uniqid('', true)), null, 'no');
     }
 
     public function insert_rewrite_rules($rules) {
