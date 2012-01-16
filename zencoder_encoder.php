@@ -144,7 +144,6 @@ class ZencoderEncoder {
             'input' => $file,
             'output' => array(),
             'api_key' => $this->options['api_key'],
-            'test' => true,
         );
         foreach ( $sizes as $size => $meta ) {
             foreach ( DragonVideo::encode_formats() as $format ) {
