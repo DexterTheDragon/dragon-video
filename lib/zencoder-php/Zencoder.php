@@ -2,24 +2,29 @@
 /*
 
   Zencoder API PHP Library
-  Version: 1.0
+  Version: 1.6
   See the README file for info on how to use this library.
 
 */
 define('ZENCODER_LIBRARY_NAME',  "ZencoderPHP");
-define('ZENCODER_LIBRARY_VERSION',  "1.0");
+define('ZENCODER_LIBRARY_VERSION',  "1.6");
 
 // Add JSON functions for PHP < 5.2.0
 if(!function_exists('json_encode')) {
-  require_once('lib/JSON.php');
+  require_once(dirname(__FILE__) . '/lib/JSON.php');
   $GLOBALS['JSON_OBJECT'] = new Services_JSON(SERVICES_JSON_LOOSE_TYPE);
   function json_encode($value) { return $GLOBALS['JSON_OBJECT']->encode($value); }
   function json_decode($value) { return $GLOBALS['JSON_OBJECT']->decode($value); }
 }
 
+// Check that cURL extension is enabled
+if(!function_exists('curl_init')) {
+  throw new Exception('You must have the cURL extension enabled to use this library.');
+}
+
 class ZencoderJob {
 
-  var $new_job_url = "https://app.zencoder.com/api/jobs";
+  var $new_job_url = "https://app.zencoder.com/api/v1/jobs";
   var $new_job_params = array();
   var $created = false;
   var $errors = array();
@@ -35,12 +40,12 @@ class ZencoderJob {
   function ZencoderJob($params, $options = array()) {
 
     // Build using params if not sending request
-    if($options["build"]) {
+    if(!empty($options["build"])) {
       $this->update_attributes($params);
       return true;
     }
     
-    if($options["url"]) $this->new_job_url = $options["url"];
+    if(!empty($options["url"])) $this->new_job_url = $options["url"];
     $this->new_job_params = $params;
     $this->created = $this->create();
   }
@@ -75,7 +80,7 @@ class ZencoderJob {
   // Use the Label for the key if avaiable.
   function create_outputs($outputs = array()) {
     foreach($outputs as $output_attrs) {
-      if($output_attrs["label"]) {
+      if(!empty($output_attrs["label"])) {
         $this->outputs[$output_attrs["label"]] = new ZencoderOutputFile($output_attrs);
       } else {
         $this->outputs[] = new ZencoderOutputFile($output_attrs);
@@ -119,7 +124,8 @@ class ZencoderRequest {
 
     // Add api_key to url if supplied
     if($api_key) {
-      $url .= "?api_key=".$api_key;
+      $url .= (substr_count($url, '?') > 0) ? "&api_key=" : "?api_key=";
+      $url .= $api_key;
     }
 
     // Get JSON
@@ -173,6 +179,8 @@ class ZencoderCURL {
     CURLOPT_HTTPHEADER => array("Content-Type: application/json", "Accept: application/json"),
     CURLOPT_CONNECTTIMEOUT => 0, // Time in seconds to timeout send request. 0 is no timeout.
     CURLOPT_FOLLOWLOCATION => 1, // Follow redirects.
+    CURLOPT_SSL_VERIFYPEER => 1,
+    CURLOPT_SSL_VERIFYHOST => 2
   );
 
   var $connected;
@@ -183,9 +191,15 @@ class ZencoderCURL {
   // Initialize
   function ZencoderCURL($url, $json, $options = array()) {
 
+    // If PHP in safe mode, disable following location
+    if( ini_get('safe_mode') ) {
+      $this->options[CURLOPT_FOLLOWLOCATION] = 0;
+    }
+
     // Add library details to request
     $this->options[CURLOPT_HTTPHEADER][] = "Zencoder-Library-Name: ".ZENCODER_LIBRARY_NAME;
     $this->options[CURLOPT_HTTPHEADER][] = "Zencoder-Library-Version: ".ZENCODER_LIBRARY_VERSION;
+    $this->options[CURLOPT_USERAGENT] = ZENCODER_LIBRARY_NAME . " " . ZENCODER_LIBRARY_VERSION;
 
     // If posting data
     if($json) {
@@ -206,17 +220,19 @@ class ZencoderCURL {
 
     // Execute session and store returned results
     $this->results = curl_exec($ch);
+    
+    // Code based on Facebook PHP SDK
+    // Retries request if unable to validate cert chain
+    if (curl_errno($ch) == 60) { // CURLE_SSL_CACERT
+      curl_setopt($ch, CURLOPT_CAINFO, dirname(__FILE__) . '/lib/zen_ca_chain.crt');
+      $this->results = curl_exec($ch);
+    }
 
     // Store the HTTP status code given (201, 404, etc.)
     $this->status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
     // Check for cURL error
     if (curl_errno($ch)) {
-      // if (curl) {
-      //   
-      // } else {
-      //   
-      // }
       $this->error = 'cURL connection error ('.curl_errno($ch).'): '.htmlspecialchars(curl_error($ch)).' <a href="http://www.google.com/search?q='.urlencode("curl error ".curl_error($ch)).'">Search</a>';
       $this->connected = false;
     } else {
@@ -235,11 +251,11 @@ class ZencoderOutputNotification {
   var $job;
 
   function ZencoderOutputNotification($params) {
-    if($params["output"]) $this->output = new ZencoderOutputFile($params["output"]);
-    if($params["job"]) $this->job = new ZencoderJob($params["job"], array("build" => true));
+    if(!empty($params["output"])) $this->output = new ZencoderOutputFile($params["output"]);
+    if(!empty($params["job"])) $this->job = new ZencoderJob($params["job"], array("build" => true));
   }
 
-  function catch_and_parse() {
+  static function catch_and_parse() {
     $notificiation_data = json_decode(trim(file_get_contents('php://input')), true);
     return new ZencoderOutputNotification($notificiation_data);
   }

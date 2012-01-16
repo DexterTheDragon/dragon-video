@@ -1,10 +1,10 @@
 Zencoder API PHP Library
 ==========================
 
-Author:  [Steve Heffernan](http://www.steveheffernan.com) (steve (a) zencoder (.) c&#1;om)  
+Author:  [Steve Heffernan](http://www.steveheffernan.com) (steve (a) zencoder (.) c&#1;om)
 Company: [Zencoder - Online Video Encoder](http://zencoder.com)  
-Version: 1.1  
-Date:    2010-06-04  
+Version: 1.3
+Date:    2011-09-21
 Repository: <http://github.com/zencoder/zencoder-php/>  
 
 For more details on the Zencoder API requirements visit  
@@ -195,5 +195,9 @@ Your [notifications page](https://app.zencoder.com/notifications) will come in h
 
 VERSIONS
 ---------
+    Version 1.6 - 2011-10-24    Fixed issue with user agents in cURL
+    Version 1.4 - 2011-10-06    Fixed error with adding api_key to URL
+    Version 1.3 - 2011-09-21    Fixed bundled SSL certification chain and made catch_and_parse() static
+    Version 1.2 - 2011-08-06    Added fixes for PHP Notices and SSL handling
     Version 1.1 - 2010-06-04    Added General API Requests
     Version 1.0 - 2010-04-02    Jobs and Notifications.

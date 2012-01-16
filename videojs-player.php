@@ -1,4 +1,12 @@
 <?php
+/*
+Plugin Name: Dragon Video - VideoJS Player
+Plugin URI: http://github.com/DexterTheDragon/dragon-video
+Description: Bundled player for Dragon Video. Uses the http://videojs.com player.
+Author: Kevin Carter
+Version: 0.1
+Author URI: http://dexterthedragon.com/
+*/
 class VideoJsPlayer {
 
     function VideoJsPlayer() {
@@ -8,7 +16,7 @@ class VideoJsPlayer {
 
     function add_videojs_header() {
         echo "";
-        $url = WP_PLUGIN_URL.'/'.str_replace(basename( __FILE__),"",plugin_basename(__FILE__)) . 'video-js';
+        $url = WP_PLUGIN_URL.'/'.str_replace(basename( __FILE__),"",plugin_basename(__FILE__)) . 'lib/video-js';
         echo <<<HTML
         <script src="{$url}/video.js" type="text/javascript" charset="utf-8"></script>
         <link rel="stylesheet" href="{$url}/video-js.css" type="text/css" media="screen" title="Video JS" charset="utf-8">

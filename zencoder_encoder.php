@@ -1,4 +1,12 @@
 <?php
+/*
+Plugin Name: Dragon Video - Zencoder encoder
+Plugin URI: http://github.com/DexterTheDragon/dragon-video
+Description: Bundled encoder for Dragon Video. Uses http://zencoder.com to perform video encoding.
+Author: Kevin Carter
+Version: 0.1
+Author URI: http://dexterthedragon.com/
+*/
 class ZencoderEncoder {
 
     protected $_messages = array();
@@ -72,7 +80,7 @@ class ZencoderEncoder {
 
             if ($token == $savedtoken) {
                 require_once(ABSPATH . 'wp-admin/includes/file.php');
-                require_once("zencoder-php/Zencoder.php");
+                require_once("lib/zencoder-php/Zencoder.php");
                 $notification = ZencoderOutputNotification::catch_and_parse();
                 $tmp = download_url($notification->output->url);
 
@@ -130,7 +138,7 @@ class ZencoderEncoder {
 
     function make_encodings($file, $attachment_id, $sizes) {
         $file = str_replace(WP_CONTENT_DIR, WP_CONTENT_URL, $file);
-        require_once("zencoder-php/Zencoder.php");
+        require_once("lib/zencoder-php/Zencoder.php");
         // New Encoding Job
         $job = array(
             'input' => $file,
