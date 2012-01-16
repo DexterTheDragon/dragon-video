@@ -2,7 +2,7 @@
 /*
 Plugin Name: Dragon Video
 Plugin URI: http://github.com/DexterTheDragon/dragon-video
-Description: Provides ability to transcode/resize (using FFMPEG), and play videos with native support, using the HTML5 video tag and canvas element, in Firefox (Ogg Vorbis/Theora) and Safari (H264/AAC), and plugin support for Shockwave Flash (FLV), with the same (Firefox-like) controls. It intergrates with Wordpress Media Library so that when you upload a video, it automatically gets resized and transcoded to the configured formats. You can then insert the video into a post by browsing the library and clicking the "Insert into Post" button, which inserts a shortcode which will then be converted to the html needed to play the video. Note: This plugin requires that your server have ffmpeg, ffmpeg2theora, and the nessasary software packages to encode to the codecs ogg, mp3, aac, x264, and flv.
+Description: Extensible html5 video plugin. Dragon Video handles the interactions with WordPress (uploading videos, shortcodes, gallery) and leaves the actual transcoding and optional &lt;video&gt; player display to a filter. It intergrates with Wordpress Media Library so that when you upload a video, it automatically gets resized and transcoded to the configured formats. You can then insert the video into a post by browsing the library and clicking the "Insert into Post" button, which inserts a shortcode which will then be converted to the html needed to play the video. ffmpeg is needed to query video information, though the actual transcoding can be handled by a third part service. A default encoder is provided that uses zencoder.com to transcode videos. A VideoJS player is also included.
 Author: Kevin Carter
 Version: 0.1
 Author URI: http://dexterthedragon.com/
@@ -257,7 +257,7 @@ HTML;
     }
 
     function show_video_fields_to_edit($fields, $post) {
-        if ( !$this->is_video( $post ) ) {
+        if ( !$this->is_video( $post->ID ) ) {
             return $fields;
         }
         unset($fields['url']);
