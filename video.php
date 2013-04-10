@@ -313,6 +313,9 @@ HTML;
     }
 
     public function video_gallery($html, $attr) {
+        if ( isset($attr['type']) && $attr['type'] != 'default' ) {
+            return;
+        }
         global $post, $wp_locale;
         // We're trusting author input, so let's at least make sure it looks like a valid orderby statement
         if ( isset( $attr['orderby'] ) ) {
