@@ -612,7 +612,8 @@ class DragonVideoTests extends WP_UnitTestCase
     {
         $this->create_attachment();
         $link_text = 'Hello World';
-        $expected = "<a href='http://example.org/?attachment_id={$this->attachment_id}' title='video.ogv' class='video_overlay'>$link_text</a>";
+        $url = get_attachment_link($this->attachment_id);
+        $expected = "<a href='$url' title='video.ogv' class='video_overlay'>$link_text</a>";
         $actual = $this->dragonvideo->wp_get_attachment_link('', $this->attachment_id, null, true, null, $link_text);
         $this->assertEquals($expected, $actual);
     }
