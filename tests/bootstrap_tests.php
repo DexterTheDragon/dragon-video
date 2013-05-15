@@ -11,7 +11,7 @@
 // Add this plugin to WordPress for activation so it can be tested.
 
 $GLOBALS['wp_tests_options'] = array(
-	'active_plugins' => array( "dragon-video/video.php" ),
+	'active_plugins' => array( "dragon-video/".getenv('PLUGIN')),
 );
 
 // If the wordpress-tests repo location has been customized (and specified
