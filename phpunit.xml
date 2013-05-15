@@ -1,0 +1,27 @@
+<phpunit
+        bootstrap="tests/bootstrap_tests.php"
+        backupGlobals="false"
+        colors="true"
+        verbose="true"
+>
+    <testsuites>
+        <!-- Default test suite to run all tests -->
+        <testsuite>
+            <directory prefix="test_" suffix=".php">tests</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">./</directory>
+            <exclude>
+                <directory suffix=".php">./tests/</directory>
+                <directory suffix=".php">./lib/</directory>
+                <file>bootstrap_tests.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
+    <logging>
+        <log type="coverage-html" target="coverage" charset="UTF-8" highlight="true" />
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="false" />
+    </logging>
+</phpunit>

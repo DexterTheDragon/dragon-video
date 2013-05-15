@@ -1,0 +1,92 @@
+                <div class="updated">
+                    <p>
+                        <strong>Options updated!</strong>
+                    </p>
+                </div>
+                <div class="wrap">
+    <div id="icon-options-general" class="icon32"><br /></div>
+    <h2>Dragon Video Settings</h2>
+    <form method="post" action="">
+        <div id="watermark_text" class="watermark_type">
+            <table class="form-table" style="clear:none; width:auto;">
+                <tr>
+                    <th>FFmpeg path</th>
+                    <td>
+                    <input type="text" size="40" name="ffmpeg_path" value="/usr/bin/ffmpeg" /><br />
+                    <span class="description">FFmpeg needed for video info discovery.</span>
+                    </td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Formats:</th>
+                    <td>
+                                                    <label>
+                                <input name="formats[mp4]" type="hidden" id="formats_mp4_0" value="0" />
+                                <input name="formats[mp4]" type="checkbox" id="formats_mp4" value="1" checked="checked" />
+                                mp4                            </label>
+                            <br />
+                                                    <label>
+                                <input name="formats[webm]" type="hidden" id="formats_webm_0" value="0" />
+                                <input name="formats[webm]" type="checkbox" id="formats_webm" value="1" checked="checked" />
+                                webm                            </label>
+                            <br />
+                                                    <label>
+                                <input name="formats[ogv]" type="hidden" id="formats_ogv_0" value="0" />
+                                <input name="formats[ogv]" type="checkbox" id="formats_ogv" value="1" checked="checked" />
+                                ogv                            </label>
+                            <br />
+                                                <span class="description">Which formats to encode to.</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Override WordPress Gallery</th>
+                    <td>
+                    <input name="override_gallery" type="checkbox" id="override_gallery" value="1" />
+                    <span class="description">Override the WordPress gallery to include videos and images.</span>
+                    </td>
+                </tr>
+            </table>
+            <h3>Video Sizes</h3>
+            <p>Maximum sizes to encode videos to. Leave blank to skip size.</p>
+            <table class="form-table" style="clear:none; width:auto;">
+                                    <tr valign="top">
+                        <th scope="row">Large:</th>
+                        <td>
+                            <label>
+                                Max Width <input name="sizes[large][0]" type="text" id="size_large" value="" class="small-text" />
+                            </label>
+                            <label>
+                                Max Height <input name="sizes[large][1]" type="text" id="size_large" value="" class="small-text" />
+                            </label>
+                        </td>
+                    </tr>
+                                    <tr valign="top">
+                        <th scope="row">Medium:</th>
+                        <td>
+                            <label>
+                                Max Width <input name="sizes[medium][0]" type="text" id="size_medium" value="720" class="small-text" />
+                            </label>
+                            <label>
+                                Max Height <input name="sizes[medium][1]" type="text" id="size_medium" value="480" class="small-text" />
+                            </label>
+                        </td>
+                    </tr>
+                                    <tr valign="top">
+                        <th scope="row">Small:</th>
+                        <td>
+                            <label>
+                                Max Width <input name="sizes[small][0]" type="text" id="size_small" value="480" class="small-text" />
+                            </label>
+                            <label>
+                                Max Height <input name="sizes[small][1]" type="text" id="size_small" value="320" class="small-text" />
+                            </label>
+                        </td>
+                    </tr>
+                            </table>
+        </div>
+
+        <p class="submit">
+            <input type="submit" name="Submit" class="button-primary" value="Save Changes" />
+        </p>
+
+    </form>
+</div>

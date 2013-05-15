@@ -170,6 +170,7 @@ class DragonVideo {
             0 === strpos(get_post_mime_type($post_id), 'video/') ||
             0 === strpos(get_post_mime_type($post_id), 'application/octet-stream'))
             return true;
+        return false;
     }
 
     function video_embed($post, $size = 'medium') {
@@ -446,11 +447,13 @@ HTML;
 
         $url = wp_get_attachment_url($_post->ID);
 
-        if ( $permalink )
+        if ( $permalink ) {
             $url = get_attachment_link($_post->ID);
+        }
 
-        if( trim($link_text) == '' )
+        if( trim($link_text) == '' ) {
             $link_text = $_post->post_title;
+        }
 
         return "<a href='$url' title='$post_title' class='video_overlay'>$link_text</a>";
     }

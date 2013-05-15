@@ -1,0 +1,16 @@
+<!-- Begin Video -->
+<!-- Using the Video for Everybody Embed Code http://camendesign.com/code/video_for_everybody -->
+<video width="720" height="480" controls preload poster="http://example.org/wp-content/uploads/poster-720x480.jpg">
+    <source src="http://example.org/wp-content/uploads/video-720x480.mp4" type="video/mp4">
+    <source src="http://example.org/wp-content/uploads/video-720x480.webm" type="video/webm">
+    <source src="http://example.org/wp-content/uploads/video-720x480.ogv" type="video/ogg">
+        <!-- Flash Fallback. -->
+    <object width="720" height="480" type="application/x-shockwave-flash" data="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf">
+        <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" />
+        <param name="allowfullscreen" value="true" />
+        <param name="flashvars" value='config={"playlist":["http://example.org/wp-content/uploads/poster-720x480.jpg", {"url": "http://example.org/wp-content/uploads/video-720x480.mp4","autoPlay":false,"autoBuffering":true}]}' />
+        <!-- Image Fallback. Typically the same as the poster image. -->
+        <img src="http://example.org/wp-content/uploads/poster-720x480.jpg" width="720" height="480" alt="Poster Image" title="No video playback capabilities." />
+    </object>
+</video>
+<!-- End Video -->
