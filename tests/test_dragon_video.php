@@ -1,4 +1,5 @@
 <?php
+require dirname(__FILE__).'/../lib/DragonVideo.php';
 
 /**
  *
@@ -55,17 +56,15 @@ class DragonVideoTests extends WP_UnitTestCase
      */
     public function test_filter_setup()
     {
-        global $dragonvideo;
+        $this->assertEquals(has_filter('attachment_fields_to_edit', array(&$this->dragonvideo, 'show_video_fields_to_edit')), 11);
+        $this->assertEquals(has_filter('media_send_to_editor', array(&$this->dragonvideo,'video_send_to_editor_shortcode')), 10);
+        $this->assertEquals(has_filter('wp_generate_attachment_metadata', array(&$this->dragonvideo, 'video_metadata')), 10);
+        $this->assertEquals(has_action('delete_attachment', array(&$this->dragonvideo, 'delete_attachment')), 10);
 
-        $this->assertEquals(has_filter('attachment_fields_to_edit', array(&$dragonvideo, 'show_video_fields_to_edit')), 11);
-        $this->assertEquals(has_filter('media_send_to_editor', array(&$dragonvideo,'video_send_to_editor_shortcode')), 10);
-        $this->assertEquals(has_filter('wp_generate_attachment_metadata', array(&$dragonvideo, 'video_metadata')), 10);
-        $this->assertEquals(has_action('delete_attachment', array(&$dragonvideo, 'delete_attachment')), 10);
+        $this->assertEquals(has_action('admin_menu', array(&$this->dragonvideo, 'admin_menu')), 1);
 
-        $this->assertEquals(has_action('admin_menu', array(&$dragonvideo, 'admin_menu')), 1);
-
-        $this->assertEquals(has_filter('post_gallery', array(&$dragonvideo, 'video_gallery')), 10);
-        $this->assertEquals(has_filter('wp_get_attachment_link', array(&$dragonvideo, 'wp_get_attachment_link')), 10);
+        $this->assertEquals(has_filter('post_gallery', array(&$this->dragonvideo, 'video_gallery')), 10);
+        $this->assertEquals(has_filter('wp_get_attachment_link', array(&$this->dragonvideo, 'wp_get_attachment_link')), 10);
 
         global $shortcode_tags;
         $this->assertEquals(array_key_exists('dragonvideo', $shortcode_tags), true);
@@ -77,8 +76,7 @@ class DragonVideoTests extends WP_UnitTestCase
     public function test_option_defaults()
     {
         // $dragonvideo = new DragonVideo();
-        global $dragonvideo;
-        $dragonvideo->activate();
+        $this->dragonvideo->activate();
 
         $expected = array(
             'formats' => array(
@@ -661,6 +659,7 @@ class DragonVideoTests extends WP_UnitTestCase
      */
     public function test_encode_formats()
     {
+        $GLOBALS['dragonvideo'] = $this->dragonvideo;
         $expected = array('mp4', 'webm', 'ogv');
         $actual = DragonVideo::encode_formats();
         $this->assertEquals($expected, $actual);

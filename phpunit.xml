@@ -12,12 +12,7 @@
     </testsuites>
     <filter>
         <whitelist>
-            <directory suffix=".php">./</directory>
-            <exclude>
-                <directory suffix=".php">./tests/</directory>
-                <directory suffix=".php">./lib/</directory>
-                <file>bootstrap_tests.php</file>
-            </exclude>
+            <directory suffix=".php">./lib</directory>
         </whitelist>
     </filter>
     <logging>

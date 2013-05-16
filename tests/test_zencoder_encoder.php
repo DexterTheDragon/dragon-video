@@ -1,4 +1,5 @@
 <?php
+require dirname(__FILE__).'/../lib/ZencoderEncoder.php';
 
 /**
  *
@@ -17,19 +18,17 @@ class ZencoderEncoderTests extends WP_UnitTestCase
      */
     public function test_filter_setup()
     {
-        global $zencoderencoder;
-
         $token = get_option('zencoder_token');
-        $this->assertEquals('http://example.org/zencoder/'.$token, $zencoderencoder->NOTIFICATION_URL);
+        $this->assertEquals('http://example.org/zencoder/'.$token, $this->zencoderencoder->NOTIFICATION_URL);
 
-        $this->assertEquals(10, has_action('admin_menu', array(&$zencoderencoder, 'admin_menu')));
+        $this->assertEquals(10, has_action('admin_menu', array(&$this->zencoderencoder, 'admin_menu')));
 
-        $this->assertEquals(10, has_action('dragon_video_encode', array(&$zencoderencoder, 'make_encodings')));
+        $this->assertEquals(10, has_action('dragon_video_encode', array(&$this->zencoderencoder, 'make_encodings')));
 
-        $this->assertEquals(10, has_filter('rewrite_rules_array', array(&$zencoderencoder, 'insert_rewrite_rules')));
-        $this->assertEquals(10, has_filter('query_vars', array(&$zencoderencoder, 'insert_query_vars')));
+        $this->assertEquals(10, has_filter('rewrite_rules_array', array(&$this->zencoderencoder, 'insert_rewrite_rules')));
+        $this->assertEquals(10, has_filter('query_vars', array(&$this->zencoderencoder, 'insert_query_vars')));
         $this->assertEquals(10, has_filter('init', 'flush_rewrite_rules'));
-        $this->assertEquals(10, has_filter('parse_query', array(&$zencoderencoder, 'do_page_redirect')));
+        $this->assertEquals(10, has_filter('parse_query', array(&$this->zencoderencoder, 'do_page_redirect')));
 
     }
 
@@ -38,8 +37,7 @@ class ZencoderEncoderTests extends WP_UnitTestCase
      */
     public function test_option_defaults()
     {
-        global $zencoderencoder;
-        $zencoderencoder->activate();
+        $this->zencoderencoder->activate();
 
         $expected = array(
             'api_key' => '',
