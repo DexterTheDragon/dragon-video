@@ -1,4 +1,7 @@
 <?php
+
+define('TEST_FIXTURE_DIR', __DIR__ . '/fixtures');
+
 /**
  * Bootstrap the plugin unit testing environment. Customize 'active_plugins'
  * setting below to point to your main plugin file.

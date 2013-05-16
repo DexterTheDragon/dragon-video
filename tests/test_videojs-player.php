@@ -27,7 +27,7 @@ class VideoJsPlayerTests extends WP_UnitTestCase
      */
     public function test_add_videojs_header()
     {
-        $expected = file_get_contents( dirname( __FILE__ ) . '/fixtures/videojs_header.html');
+        $expected = file_get_contents(TEST_FIXTURE_DIR.'/videojs_header.html');
         $actual = get_echo(array(&$this->videojsplayer, 'add_videojs_header'));
         $this->assertEquals($expected, "$actual\n");
     }
@@ -45,7 +45,7 @@ class VideoJsPlayerTests extends WP_UnitTestCase
             'ogv'    => 'test.ogv',
             'poster' => 'poster.jpg',
         );
-        $expected = file_get_contents( dirname( __FILE__ ) . '/fixtures/videojs.html');
+        $expected = file_get_contents(TEST_FIXTURE_DIR.'/videojs.html');
         $actual = $this->videojsplayer->show_video('', $video);
         $this->assertEquals($expected, "$actual\n");
     }

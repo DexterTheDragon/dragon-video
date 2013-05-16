@@ -145,7 +145,7 @@ class ZencoderEncoderTests extends WP_UnitTestCase
             'Submit' => 'true',
             'api_key' => 1234567890,
         );
-        $expected = file_get_contents( dirname( __FILE__ ) . '/fixtures/zencoder_options_page.html');
+        $expected = file_get_contents(TEST_FIXTURE_DIR.'/zencoder_options_page.html');
         $actual = get_echo(array(&$this->zencoderencoder, 'options_page'));
         $this->assertEquals($expected, $actual);
     }

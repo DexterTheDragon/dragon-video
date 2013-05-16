@@ -56,18 +56,18 @@ class DragonVideoTests extends WP_UnitTestCase
      */
     public function test_filter_setup()
     {
-        $this->assertEquals(has_filter('attachment_fields_to_edit', array(&$this->dragonvideo, 'show_video_fields_to_edit')), 11);
-        $this->assertEquals(has_filter('media_send_to_editor', array(&$this->dragonvideo,'video_send_to_editor_shortcode')), 10);
-        $this->assertEquals(has_filter('wp_generate_attachment_metadata', array(&$this->dragonvideo, 'video_metadata')), 10);
-        $this->assertEquals(has_action('delete_attachment', array(&$this->dragonvideo, 'delete_attachment')), 10);
+        $this->assertEquals(11, has_filter('attachment_fields_to_edit', array(&$this->dragonvideo, 'show_video_fields_to_edit')));
+        $this->assertEquals(10, has_filter('media_send_to_editor', array(&$this->dragonvideo,'video_send_to_editor_shortcode')));
+        $this->assertEquals(10, has_filter('wp_generate_attachment_metadata', array(&$this->dragonvideo, 'video_metadata')));
+        $this->assertEquals(10, has_action('delete_attachment', array(&$this->dragonvideo, 'delete_attachment')));
 
-        $this->assertEquals(has_action('admin_menu', array(&$this->dragonvideo, 'admin_menu')), 1);
+        $this->assertEquals(1, has_action('admin_menu', array(&$this->dragonvideo, 'admin_menu')));
 
-        $this->assertEquals(has_filter('post_gallery', array(&$this->dragonvideo, 'video_gallery')), 10);
-        $this->assertEquals(has_filter('wp_get_attachment_link', array(&$this->dragonvideo, 'wp_get_attachment_link')), 10);
+        $this->assertEquals(10, has_filter('post_gallery', array(&$this->dragonvideo, 'video_gallery')));
+        $this->assertEquals(10, has_filter('wp_get_attachment_link', array(&$this->dragonvideo, 'wp_get_attachment_link')));
 
         global $shortcode_tags;
-        $this->assertEquals(array_key_exists('dragonvideo', $shortcode_tags), true);
+        $this->assertTrue(array_key_exists('dragonvideo', $shortcode_tags));
     }
 
     /**
@@ -93,7 +93,7 @@ class DragonVideoTests extends WP_UnitTestCase
             'override_gallery' => true,
         );
 
-        $this->assertEquals(get_option('dragon-video'), $expected);
+        $this->assertEquals($expected, get_option('dragon-video'));
     }
 
     /**
@@ -193,12 +193,12 @@ class DragonVideoTests extends WP_UnitTestCase
     public function test_get_video_info()
     {
         $expected = array('width' => 720, 'height' => 480, 'duration' => 4);
-        $file = dirname( __FILE__ ) . '/fixtures/test_video.ogv';
+        $file = TEST_FIXTURE_DIR.'/test_video.ogv';
 
         $dragonvideo = new DragonVideo();
         $info = $dragonvideo->get_video_info($file);
 
-        $this->assertEquals($info, $expected);
+        $this->assertEquals($expected, $info);
     }
 
     /**
@@ -302,7 +302,7 @@ class DragonVideoTests extends WP_UnitTestCase
             ->will($this->returnValue(false));
 
         $result = $stub->delete_attachment(0);
-        $this->assertEquals(null, $result);
+        $this->assertNull($result);
     }
 
     /**
@@ -344,7 +344,7 @@ class DragonVideoTests extends WP_UnitTestCase
      */
     public function test_video_embed()
     {
-        $expected = file_get_contents( dirname( __FILE__ ) . '/fixtures/video.html');
+        $expected = file_get_contents(TEST_FIXTURE_DIR.'/video.html');
 
         $this->create_attachment();
         $post = get_post($this->attachment_id);
@@ -570,7 +570,7 @@ class DragonVideoTests extends WP_UnitTestCase
         wp_update_attachment_metadata( $this->attachment_id, $metadata );
 
         $result = $this->dragonvideo->get_video_for_size($this->attachment_id, 'small');
-        $this->assertEquals(null, $result);
+        $this->assertNull($result);
     }
 
     /**
@@ -649,7 +649,7 @@ class DragonVideoTests extends WP_UnitTestCase
             'Submit' => 'true',
             'override_gallery' => 0,
         );
-        $expected = file_get_contents( dirname( __FILE__ ) . '/fixtures/options_page.html');
+        $expected = file_get_contents(TEST_FIXTURE_DIR.'/options_page.html');
         $actual = get_echo(array(&$this->dragonvideo, 'options_page'));
         $this->assertEquals($expected, $actual);
     }
