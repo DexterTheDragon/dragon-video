@@ -76,7 +76,7 @@ class ZencoderEncoder {
         }
     }
 
-    private function _handle_incoming_video($token) {
+    protected function _handle_incoming_video($token) {
         if (!empty($_POST)) {
             $savedtoken = get_option('zencoder_token');
 
