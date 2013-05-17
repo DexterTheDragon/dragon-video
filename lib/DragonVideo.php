@@ -426,7 +426,7 @@ HTML;
             return $html;
         }
 
-        $_post = & get_post( $id );
+        $_post = get_post( $id );
 
         $post_title = esc_attr($_post->post_title);
 
