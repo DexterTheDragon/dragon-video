@@ -4,12 +4,11 @@ $GLOBALS['dragonvideo'] = new DragonVideo();
 require dirname(__FILE__).'/../lib/ZencoderEncoder.php';
 require dirname(__FILE__).'/../vendor/autoload.php';
 
-class MockJob {
-    function create($job) {
-        throw new Services_Zencoder_Exception('ERROR');
+class ZencoderEncoderTestWrapper extends ZencoderEncoder {
+    public function _handle_incoming_video($token) {
+        parent::_handle_incoming_video($token);
     }
 }
-
 /**
  *
  */
@@ -19,7 +18,7 @@ class ZencoderEncoderTests extends WP_UnitTestCase
     public function setUp()
     {
         parent::setUp();
-        $this->zencoderencoder = new ZencoderEncoder();
+        $this->zencoderencoder = new ZencoderEncoderTestWrapper();
     }
 
     /**
@@ -127,7 +126,78 @@ class ZencoderEncoderTests extends WP_UnitTestCase
      */
     public function test__handle_incoming_video()
     {
-        $this->markTestIncomplete();
+        $post_id       = $this->factory->post->create();
+        $attachment_id = $this->factory->attachment->create_object( 'video.ogv', $post_id, array(
+            'post_mime_type' => 'video/ogg',
+            'post_type'      => 'attachment',
+            'post_title'     => 'video.ogv',
+        ) );
+        $metadata = array (
+            'height'   => 480,
+            'width'    => 720,
+            'duration' => 4,
+            'sizes'    => array (
+                'small' => array (
+                    'width'  => 480,
+                    'height' => 320,
+                    'poster' => '',
+                    'file'   => array (
+                        'mp4'  => 'video-480x320.mp4',
+                        'webm' => 'video-480x320.webm',
+                        'ogv'  => 'video-480x320.ogv',
+                    ),
+                ),
+            ),
+        );
+        wp_update_attachment_metadata( $attachment_id, $metadata );
+
+        $token = 1234567890;
+        update_option('zencoder_token', $token);
+        $_SERVER['REQUEST_METHOD'] = "POST";
+
+        $notification = json_decode("{
+            \"job\": {
+                \"outputs\": [{
+                    \"label\": \"$attachment_id-webm-small\",
+                    \"url\": \"http://google.com/images/google_favicon_128.png\",
+                    \"thumbnails\": [{
+                        \"images\": [{
+                            \"url\": \"http://google.com/images/google_favicon_128.png\",
+                            \"format\": \"png\"
+                        }]
+                    }]
+                }]
+            }
+        }");
+
+        $stub = new stdClass;
+        $stub->notifications = $this->getMock('stdClass', array('parseIncoming'));
+        $stub->notifications->expects($this->once())
+            ->method('parseIncoming')
+            ->will($this->returnValue($notification));
+
+        $this->zencoderencoder->zencoder = $stub;
+
+        $z = $this->zencoderencoder;
+        $actual = get_echo(array(&$z, '_handle_incoming_video'), array($token));
+        $expected = "Saved $attachment_id-webm-small to /var/www/wordpress/wp-content/uploads/video-480x320.webm
+Saved poster /var/www/wordpress/wp-content/uploads/video-480x320-0.png
+";
+        $this->assertEquals($expected, $actual);
+        unset($_SERVER['REQUEST_METHOD']);
+    }
+
+    /**
+     * @covers ZencoderEncoder::_handle_incoming_video
+     */
+    public function test__handle_incoming_video_error_message()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $z = $this->zencoderencoder;
+        $actual = get_echo(array(&$z, '_handle_incoming_video'), array(''));
+        $expected = "<strong>ERROR:</strong> no direct access";
+        $this->assertEquals($expected, $actual);
+        unset($_SERVER['REQUEST_METHOD']);
     }
 
     /**

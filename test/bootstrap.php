@@ -1,4 +1,5 @@
 <?php
+require 'helper.php';
 
 define('TEST_FIXTURE_DIR', __DIR__ . '/fixtures');
 
