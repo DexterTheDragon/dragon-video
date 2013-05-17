@@ -16,8 +16,20 @@ class ZencoderEncoder {
     );
 
     function ZencoderEncoder($zencoder_class = 'Services_Zencoder') {
-        register_activation_hook(__FILE__, array(&$this, 'activate'));
         $this->NOTIFICATION_URL = get_option('siteurl') .'/zencoder/'. get_option('zencoder_token');
+        $this->options = get_option('zencoder_options', $this->options);
+        $this->zencoder = new $zencoder_class($this->options['api_key']);
+    }
+
+    /**
+     * Initialize WordPress hooks
+     *
+     * @param string $filename WordPress Plugin Filename
+     * @return void
+     **/
+    public function pluginInit($filename)
+    {
+        register_activation_hook($filename, array(&$this, 'activate'));
 
         add_action('admin_menu', array(&$this, 'admin_menu'));
 
@@ -27,9 +39,6 @@ class ZencoderEncoder {
         add_filter('query_vars',          array(&$this, 'insert_query_vars'));
         add_filter('init', 'flush_rewrite_rules');
         add_action('parse_query', array(&$this, 'do_page_redirect'));
-
-        $this->options = get_option('zencoder_options', $this->options);
-        $this->zencoder = new $zencoder_class($this->options['api_key']);
     }
 
     /**

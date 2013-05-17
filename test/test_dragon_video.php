@@ -53,9 +53,18 @@ class DragonVideoTests extends WP_UnitTestCase
 
     /**
      * @covers DragonVideo::DragonVideo
+     * @covers DragonVideo::pluginInit
      */
-    public function test_filter_setup()
+    public function test_pluginInit()
     {
+        $this->dragonvideo->pluginInit('some.php');
+
+        $this->assertEquals(
+            10,
+            has_action('activate_some.php', array(&$this->dragonvideo, 'activate')),
+            'Plugin activation not registered'
+        );
+
         $this->assertEquals(11, has_filter('attachment_fields_to_edit', array(&$this->dragonvideo, 'show_video_fields_to_edit')));
         $this->assertEquals(10, has_filter('media_send_to_editor', array(&$this->dragonvideo,'video_send_to_editor_shortcode')));
         $this->assertEquals(10, has_filter('wp_generate_attachment_metadata', array(&$this->dragonvideo, 'video_metadata')));
@@ -75,7 +84,6 @@ class DragonVideoTests extends WP_UnitTestCase
      */
     public function test_option_defaults()
     {
-        // $dragonvideo = new DragonVideo();
         $this->dragonvideo->activate();
 
         $expected = array(
@@ -101,8 +109,7 @@ class DragonVideoTests extends WP_UnitTestCase
      */
     public function test_admin_menu()
     {
-        $dragonvideo = new DragonVideo();
-        $dragonvideo->admin_menu();
+        $this->dragonvideo->admin_menu();
 
         $expected['dragonvideo'] = 'http://example.org/wp-admin/admin.php?page=dragonvideo';
 
@@ -120,7 +127,6 @@ class DragonVideoTests extends WP_UnitTestCase
         $stub->expects($this->once())
             ->method('is_video')
             ->will($this->returnValue(false));
-        // $dragonvideo = new DragonVideo();
 
         $post_id = $this->factory->post->create();
         $attachment_id = $this->factory->attachment->create_object( 'some.txt', $post_id, array(
@@ -172,7 +178,6 @@ class DragonVideoTests extends WP_UnitTestCase
         $stub->expects($this->once())
             ->method('get_video_info')
             ->will($this->returnValue(array('width' => 720, 'height' => 480, 'duration' => 4)));
-        // $dragonvideo = new DragonVideo();
 
         $this->create_attachment();
 
@@ -195,8 +200,7 @@ class DragonVideoTests extends WP_UnitTestCase
         $expected = array('width' => 720, 'height' => 480, 'duration' => 4);
         $file = TEST_FIXTURE_DIR.'/test_video.ogv';
 
-        $dragonvideo = new DragonVideo();
-        $info = $dragonvideo->get_video_info($file);
+        $info = $this->dragonvideo->get_video_info($file);
 
         $this->assertEquals($expected, $info);
     }
@@ -214,8 +218,7 @@ class DragonVideoTests extends WP_UnitTestCase
                 'post_title' => 'video.ogv'
             ) );
 
-            $dragonvideo = new DragonVideo();
-            $this->assertTrue($dragonvideo->is_video($attachment_id));
+            $this->assertTrue($this->dragonvideo->is_video($attachment_id));
         }
     }
 
@@ -232,8 +235,7 @@ class DragonVideoTests extends WP_UnitTestCase
                 'post_title' => 'video.ogv'
             ) );
 
-            $dragonvideo = new DragonVideo();
-            $this->assertFalse($dragonvideo->is_video($attachment_id));
+            $this->assertFalse($this->dragonvideo->is_video($attachment_id));
         }
     }
 
@@ -251,8 +253,7 @@ class DragonVideoTests extends WP_UnitTestCase
                 'post_title' => 'video.ogv'
             ) );
 
-            $dragonvideo = new DragonVideo();
-            $this->assertTrue($dragonvideo->is_video($attachment_id));
+            $this->assertTrue($this->dragonvideo->is_video($attachment_id));
         }
     }
 
@@ -266,8 +267,7 @@ class DragonVideoTests extends WP_UnitTestCase
             'medium',
             'small',
         );
-        $dragonvideo = new DragonVideo();
-        $this->assertEquals($expected, $dragonvideo->get_video_sizes());
+        $this->assertEquals($expected, $this->dragonvideo->get_video_sizes());
     }
 
     /**
@@ -286,8 +286,7 @@ class DragonVideoTests extends WP_UnitTestCase
             'poster' => '',
         );
 
-        $dragonvideo = new DragonVideo();
-        $actual = $dragonvideo->make_encodings(null, null, 'video.flv', 720, 480, null);
+        $actual = $this->dragonvideo->make_encodings(null, null, 'video.flv', 720, 480, null);
         $this->assertEquals($expected, $actual);
     }
 
@@ -335,8 +334,7 @@ class DragonVideoTests extends WP_UnitTestCase
 
         wp_update_attachment_metadata( $this->attachment_id, $metadata );
 
-        $dragonvideo = new DragonVideo();
-        $dragonvideo->delete_attachment($this->attachment_id);
+        $this->dragonvideo->delete_attachment($this->attachment_id);
     }
 
     /**
@@ -354,8 +352,7 @@ class DragonVideoTests extends WP_UnitTestCase
         add_action($tag, array(&$a, 'action'));
 
 
-        $dragonvideo = new DragonVideo();
-        $html = $dragonvideo->video_embed($post);
+        $html = $this->dragonvideo->video_embed($post);
         $this->assertEquals($expected, "$html\n");
 
         $this->assertEquals(1, $a->get_call_count());
@@ -367,8 +364,7 @@ class DragonVideoTests extends WP_UnitTestCase
      */
     public function test_tag_replace_returns_video_not_found()
     {
-        $dragonvideo = new DragonVideo();
-        $actual = $dragonvideo->tag_replace(array(0));
+        $actual = $this->dragonvideo->tag_replace(array(0));
         $this->assertEquals('Video 0 Not Found', $actual);
     }
 
@@ -410,8 +406,7 @@ class DragonVideoTests extends WP_UnitTestCase
     public function test_video_send_to_editor_shortcode_returns_html_when_not_a_video()
     {
         $expected = 'Nothing to see here';
-        $dragonvideo = new DragonVideo();
-        $actual = $dragonvideo->video_send_to_editor_shortcode($expected, 0, null);
+        $actual = $this->dragonvideo->video_send_to_editor_shortcode($expected, 0, null);
         $this->assertEquals($expected, $actual);
     }
 
@@ -422,8 +417,7 @@ class DragonVideoTests extends WP_UnitTestCase
     {
         $this->create_attachment();
         $expected = "[dragonvideo {$this->attachment_id}]";
-        $dragonvideo = new DragonVideo();
-        $actual = $dragonvideo->video_send_to_editor_shortcode($expected, $this->attachment_id, null);
+        $actual = $this->dragonvideo->video_send_to_editor_shortcode($expected, $this->attachment_id, null);
         $this->assertEquals($expected, $actual);
     }
 
@@ -435,8 +429,7 @@ class DragonVideoTests extends WP_UnitTestCase
         $post = new stdClass;
         $post->ID = 0;
         $expected = array('Nothing to see here');
-        $dragonvideo = new DragonVideo();
-        $actual = $dragonvideo->show_video_fields_to_edit($expected, $post);
+        $actual = $this->dragonvideo->show_video_fields_to_edit($expected, $post);
         $this->assertEquals($expected, $actual);
     }
 
@@ -659,8 +652,12 @@ class DragonVideoTests extends WP_UnitTestCase
      */
     public function test_encode_formats()
     {
-        $GLOBALS['dragonvideo'] = $this->dragonvideo;
-        $expected = array('mp4', 'webm', 'ogv');
+        update_option('dragon-video', array(
+            'formats' => array(
+                'mp4' => true, 'webm' => true, 'ogv' => false
+            )
+        ));
+        $expected = array('mp4', 'webm');
         $actual = DragonVideo::encode_formats();
         $this->assertEquals($expected, $actual);
     }

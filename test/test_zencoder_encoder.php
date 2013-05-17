@@ -1,6 +1,5 @@
 <?php
 require_once dirname(__FILE__).'/../lib/DragonVideo.php';
-$GLOBALS['dragonvideo'] = new DragonVideo();
 require dirname(__FILE__).'/../lib/ZencoderEncoder.php';
 require dirname(__FILE__).'/../vendor/autoload.php';
 
@@ -24,10 +23,26 @@ class ZencoderEncoderTests extends WP_UnitTestCase
     /**
      * @covers ZencoderEncoder::ZencoderEncoder
      */
-    public function test_filter_setup()
+    public function test_construct()
     {
+        $zencoderencoder = new ZencoderEncoder;
+
         $token = get_option('zencoder_token');
         $this->assertEquals('http://example.org/zencoder/'.$token, $this->zencoderencoder->NOTIFICATION_URL);
+    }
+
+    /**
+     * @covers ZencoderEncoder::pluginInit
+     */
+    public function test_pluginInit()
+    {
+        $this->zencoderencoder->pluginInit('some.php');
+
+        $this->assertEquals(
+            10,
+            has_action('activate_some.php', array(&$this->zencoderencoder, 'activate')),
+            'Plugin activation not registered'
+        );
 
         $this->assertEquals(10, has_action('admin_menu', array(&$this->zencoderencoder, 'admin_menu')));
 

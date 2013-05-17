@@ -30,8 +30,18 @@ class DragonVideo {
     );
 
     function DragonVideo() {
-        register_activation_hook(__FILE__, array(&$this, 'activate'));
         $this->options = get_option('dragon-video', $this->options);
+    }
+
+    /**
+     * Initialize WordPress hooks
+     *
+     * @param string $filename WordPress Plugin Filename
+     * @return void
+     **/
+    public function pluginInit($filename)
+    {
+        register_activation_hook($filename, array(&$this, 'activate'));
 
         add_filter('attachment_fields_to_edit', array(&$this, 'show_video_fields_to_edit'), 11, 2);
         add_filter('media_send_to_editor', array(&$this,'video_send_to_editor_shortcode'), 10, 3 );
@@ -536,7 +546,7 @@ HTML;
     }
 
     static function encode_formats() {
-        global $dragonvideo;
+        $dragonvideo = new DragonVideo();
         $options = $dragonvideo->options;
         return array_keys(array_filter($options['formats'], create_function('$o', 'return $o;')));
     }

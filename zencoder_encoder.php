@@ -12,3 +12,4 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 require 'lib/ZencoderEncoder.php';
 
 $zencoderencoder = new ZencoderEncoder;
+$zencoderencoder->pluginInit(__FILE__);

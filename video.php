@@ -13,3 +13,4 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 require 'lib/DragonVideo.php';
 
 $dragonvideo = new DragonVideo();
+$dragonvideo->pluginInit(__FILE__);
