@@ -1,8 +1,9 @@
 <?php
 require dirname(__FILE__).'/../vendor/autoload.php';
-class ZencoderEncoder {
+class ZencoderEncoder
+{
 
-    protected $_messages = array();
+    protected $messages = array();
 
     protected $options = array(
         'api_key' => '',
@@ -15,7 +16,8 @@ class ZencoderEncoder {
         'ogv'  => 'theora',
     );
 
-    function __construct($zencoder_class = 'Services_Zencoder') {
+    public function __construct($zencoder_class = 'Services_Zencoder')
+    {
         $this->NOTIFICATION_URL = get_option('siteurl') .'/zencoder/'. get_option('zencoder_token');
         $this->options = get_option('zencoder_options', $this->options);
         $this->zencoder = new $zencoder_class($this->options['api_key']);
@@ -44,16 +46,19 @@ class ZencoderEncoder {
     /**
      * Plugin installation method
      */
-    public function activate() {
+    public function activate()
+    {
         add_option('zencoder_options', $this->options, null, 'no');
         add_option('zencoder_token', md5(uniqid('', true)), null, 'no');
     }
 
-    public function admin_menu() {
+    public function admin_menu()
+    {
         add_submenu_page('dragonvideo', 'Zencoder', 'Zencoder Options', 'manage_options', 'zencoder', array(&$this, 'options_page'));
     }
 
-    public function insert_rewrite_rules($rules) {
+    public function insert_rewrite_rules($rules)
+    {
         $new_rules = array(
             'zencoder/([a-zA-Z0-9]{32})/?$' => 'index.php?za=zencoder&zk=$matches[1]',
         );
@@ -61,23 +66,26 @@ class ZencoderEncoder {
         return $new_rules + $rules;
     }
 
-    public function insert_query_vars($vars) {
+    public function insert_query_vars($vars)
+    {
         array_unshift($vars, 'za', 'zk');
         return $vars;
     }
 
-    public function do_page_redirect($wp_query) {
+    public function do_page_redirect($wp_query)
+    {
         if (isset($wp_query->query_vars['za'])) {
             switch ($wp_query->query_vars['za']) {
                 case 'zencoder':
-                    $this->_handle_incoming_video($wp_query->query_vars['zk']);
+                    $this->handle_incoming_video($wp_query->query_vars['zk']);
                     break;
             }
             exit;
         }
     }
 
-    protected function _handle_incoming_video($token) {
+    protected function handle_incoming_video($token)
+    {
         if ( $_SERVER['REQUEST_METHOD'] === 'POST' ) {
             $savedtoken = get_option('zencoder_token');
 
@@ -131,7 +139,8 @@ class ZencoderEncoder {
         }
     }
 
-    function make_encodings($file, $attachment_id, $sizes) {
+    function make_encodings($file, $attachment_id, $sizes)
+    {
         $file = str_replace(WP_CONTENT_DIR, WP_CONTENT_URL, $file);
         // New Encoding Job
         $job = array(
@@ -176,7 +185,8 @@ class ZencoderEncoder {
     /**
      * Display options page
      */
-    public function options_page() {
+    public function options_page()
+    {
         // if user clicked "Save Changes" save them
         if ( isset($_POST['Submit']) ) {
             foreach ( $this->options as $option => $value ) {
@@ -186,10 +196,10 @@ class ZencoderEncoder {
             }
             update_option('zencoder_options', $this->options);
 
-            $this->_messages['updated'][] = 'Options updated!';
+            $this->messages['updated'][] = 'Options updated!';
         }
 
-        foreach ( $this->_messages as $namespace => $messages ) {
+        foreach ( $this->messages as $namespace => $messages ) {
             foreach ( $messages as $message ) { ?>
                 <div class="<?php echo $namespace; ?>">
                     <p>

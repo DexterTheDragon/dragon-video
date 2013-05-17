@@ -1,17 +1,21 @@
 <?php
-class VideoJsPlayer {
+class VideoJsPlayer
+{
 
-    function __construct() {
+    public function __construct()
+    {
         add_action( 'wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
         add_filter('dragon_video_player', array(&$this, 'show_video'), 10, 2);
     }
 
-    function enqueue_scripts() {
+    public function enqueue_scripts()
+    {
         wp_enqueue_script('videojs', '//vjs.zencdn.net/4.0/video.js');
         wp_enqueue_style('videojs', '//vjs.zencdn.net/4.0/video-js.css');
     }
 
-    function show_video($html, $video) {
+    public function show_video($html, $video)
+    {
         extract($video);
 
         $mp4_source = $mp4_link = $flash_fallback = $webm_source = $webm_link = $ogv_source = $ogv_link = null;

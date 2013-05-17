@@ -4,8 +4,8 @@ require dirname(__FILE__).'/../lib/ZencoderEncoder.php';
 require dirname(__FILE__).'/../vendor/autoload.php';
 
 class ZencoderEncoderTestWrapper extends ZencoderEncoder {
-    public function _handle_incoming_video($token) {
-        parent::_handle_incoming_video($token);
+    public function handle_incoming_video($token) {
+        parent::handle_incoming_video($token);
     }
 }
 /**
@@ -127,9 +127,9 @@ class ZencoderEncoderTest extends WP_UnitTestCase
             'zk' => 'foobarbaz',
         );
 
-        $stub = $this->getMock('ZencoderEncoder', array('_handle_incoming_video'));
+        $stub = $this->getMock('ZencoderEncoder', array('handle_incoming_video'));
         $stub->expects($this->once())
-            ->method('_handle_incoming_video')
+            ->method('handle_incoming_video')
             ->with($wp_query->query_vars['zk'])
             ->will($this->returnValue(true));
 
@@ -137,9 +137,9 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::_handle_incoming_video
+     * @covers ZencoderEncoder::handle_incoming_video
      */
-    public function test__handle_incoming_video()
+    public function test_handle_incoming_video()
     {
         $post_id       = $this->factory->post->create();
         $attachment_id = $this->factory->attachment->create_object( 'video.ogv', $post_id, array(
@@ -194,7 +194,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
         $this->zencoderencoder->zencoder = $stub;
 
         $uploads = wp_upload_dir();
-        $actual = get_echo(array(&$this->zencoderencoder, '_handle_incoming_video'), array($token));
+        $actual = get_echo(array(&$this->zencoderencoder, 'handle_incoming_video'), array($token));
         $expected = "Saved $attachment_id-webm-small to {$uploads['basedir']}/video-480x320.webm
 Saved poster {$uploads['basedir']}/video-480x320-0.png
 ";
@@ -203,13 +203,13 @@ Saved poster {$uploads['basedir']}/video-480x320-0.png
     }
 
     /**
-     * @covers ZencoderEncoder::_handle_incoming_video
+     * @covers ZencoderEncoder::handle_incoming_video
      */
-    public function test__handle_incoming_video_error_message()
+    public function test_handle_incoming_video_error_message()
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $z = $this->zencoderencoder;
-        $actual = get_echo(array(&$z, '_handle_incoming_video'), array(''));
+        $actual = get_echo(array(&$z, 'handle_incoming_video'), array(''));
         $expected = "<strong>ERROR:</strong> no direct access";
         $this->assertEquals($expected, $actual);
         unset($_SERVER['REQUEST_METHOD']);
