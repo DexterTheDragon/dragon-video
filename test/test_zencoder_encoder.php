@@ -1,5 +1,14 @@
 <?php
+require_once dirname(__FILE__).'/../lib/DragonVideo.php';
+$GLOBALS['dragonvideo'] = new DragonVideo();
 require dirname(__FILE__).'/../lib/ZencoderEncoder.php';
+require dirname(__FILE__).'/../vendor/autoload.php';
+
+class MockJob {
+    function create($job) {
+        throw new Services_Zencoder_Exception('ERROR');
+    }
+}
 
 /**
  *
@@ -124,16 +133,112 @@ class ZencoderEncoderTests extends WP_UnitTestCase
     /**
      * @covers ZencoderEncoder::make_encodings
      */
-    public function test_make_encodings()
+    public function test_make_encodings_returns_true_and_sets_outputs()
     {
+        $options = array('api_key' => '', 'watermark_url' => 'http://example.org/watermark.url');
+        update_option('zencoder_options', $options);
+        $this->zencoderencoder = new ZencoderEncoder();
+
         $post_id       = $this->factory->post->create();
         $attachment_id = $this->factory->attachment->create_object( 'video.ogv', $post_id, array(
             'post_mime_type' => 'video/ogg',
             'post_type'      => 'attachment',
             'post_title'     => 'video.ogv',
         ) );
+        $sizes = array(
+            'small' => array(
+                'width'  => 480,
+                'height' => 320,
+                'poster' => 'poster-480x320.jpg',
+                'file'   => array(
+                    'mp4'  => 'video-480x320.mp4',
+                    'webm' => 'video-480x320.webm',
+                    'ogv'  => 'video-480x320.ogv',
+                ),
+            ),
+        );
+        $expected = array(
+            'input' => 'video.ogv',
+            'output' => array(
+                array(
+                    'label' => "{$attachment_id}-mp4-small",
+                    'video_codec' => 'h264',
+                    'width' => 480,
+                    'notifications' => array(
+                        'http://example.org/zencoder/',
+                    ),
+                    'thumbnails' => array(
+                        'number' => 2,
+                        'label' => "{$attachment_id}-mp4-small",
+                    ),
+                    'watermark' => array(
+                        'url' => 'http://example.org/watermark.url',
+                        'width' => '50%',
+                    ),
+                ),
+                array(
+                    'label' => "{$attachment_id}-webm-small",
+                    'video_codec' => 'vp8',
+                    'width' => 480,
+                    'notifications' => array(
+                        'http://example.org/zencoder/',
+                    ),
+                    'thumbnails' => array(
+                        'number' => 2,
+                        'label' => "{$attachment_id}-webm-small",
+                    ),
+                    'watermark' => array(
+                        'url' => 'http://example.org/watermark.url',
+                        'width' => '50%',
+                    ),
+                ),
+                array(
+                    'label' => "{$attachment_id}-ogv-small",
+                    'video_codec' => 'theora',
+                    'width' => 480,
+                    'notifications' => array(
+                        'http://example.org/zencoder/',
+                    ),
+                    'thumbnails' => array(
+                        'number' => 2,
+                        'label' => "{$attachment_id}-ogv-small",
+                    ),
+                    'watermark' => array(
+                        'url' => 'http://example.org/watermark.url',
+                        'width' => '50%',
+                    ),
+                ),
+            ),
+        );
 
-        $this->zencoderencoder->make_encodings('video.ogv', $attachment_id, array());
+        $output = new stdClass;
+        $output->outputs = array();
+
+        $stub = new stdClass;
+        $stub->jobs = $this->getMock('stdClass', array('create'));
+        $stub->jobs->expects($this->once())
+            ->method('create')
+            ->with($expected)
+            ->will($this->returnValue($output));
+
+        $this->zencoderencoder->zencoder = $stub;
+
+        $actual = $this->zencoderencoder->make_encodings('video.ogv', $attachment_id, $sizes);
+        $this->assertTrue($actual);
+    }
+
+    /**
+     * @covers ZencoderEncoder::make_encodings
+     */
+    public function test_make_encodings_returns_false()
+    {
+        $stub = new stdClass;
+        $stub->jobs = new MockJob;
+
+        $this->zencoderencoder->zencoder = $stub;
+
+        $actual = $this->zencoderencoder->make_encodings('video.ogv', 0, array());
+        $this->assertFalse($actual);
     }
 
     /**

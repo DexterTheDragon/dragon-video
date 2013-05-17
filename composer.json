@@ -1,4 +1,7 @@
 {
+    "require": {
+        "zencoder/zencoder-php": "v2.1.2"
+    },
     "require-dev": {
         "satooshi/php-coveralls": "dev-master"
     }
