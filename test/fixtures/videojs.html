@@ -1,27 +1,7 @@
 <!-- Begin VideoJS -->
-<div class="video-js-box">
-    <!-- Using the Video for Everybody Embed Code http://camendesign.com/code/video_for_everybody -->
-    <video class="video-js" width="720" height="480" controls preload poster="poster.jpg">
-        <source src="test.mp4" type="video/mp4">
-        <source src="test.webm" type="video/webm">
-        <source src="test.ogv" type="video/ogg">
-        <!-- Flash Fallback. Use any flash video player here. Make sure to keep the vjs-flash-fallback class. -->
-<object class="vjs-flash-fallback" width="720" height="480" type="application/x-shockwave-flash"
-    data="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf">
-    <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" />
-    <param name="allowfullscreen" value="true" />
-    <param name="flashvars" value='config={"playlist":["poster.jpg", {"url": "test.mp4","autoPlay":false,"autoBuffering":true}]}' />
-    <!-- Image Fallback. Typically the same as the poster image. -->
-    <img src="poster.jpg" width="720" height="480" alt="Poster Image" title="No video playback capabilities." />
-</object>
-    </video>
-    <!-- Download links provided for devices that can't play video in the browser. -->
-    <p class="vjs-no-video"><strong>Download Video:</strong>
-        <a href="test.mp4">MP4</a>
-        <a href="test.webm">WebM</a>
-        <a href="test.ogv">Ogg</a>
-        <!-- Support VideoJS by keeping this link. -->
-        <a href="http://videojs.com">HTML5 Video Player</a> by VideoJS
-    </p>
-</div>
+<video class="video-js vjs-default-skin" width="720" height="480" controls preload poster="poster.jpg" data-setup>
+    <source src="test.mp4" type="video/mp4">
+    <source src="test.webm" type="video/webm">
+    <source src="test.ogv" type="video/ogg">
+</video>
 <!-- End VideoJS -->

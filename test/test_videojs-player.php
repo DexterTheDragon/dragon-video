@@ -18,18 +18,24 @@ class VideoJsPlayerTests extends WP_UnitTestCase
      */
     public function test_filter_setup()
     {
-        $this->assertEquals(10, has_action('wp_head', array(&$this->videojsplayer, 'add_videojs_header')));
+        $this->assertEquals(10, has_action('wp_enqueue_scripts', array(&$this->videojsplayer, 'enqueue_scripts')));
         $this->assertEquals(10, has_filter('dragon_video_player', array($this->videojsplayer, 'show_video')));
     }
 
     /**
-     * @covers VideoJsPlayer::add_videojs_header
+     * @covers VideoJsPlayer::enqueue_scripts
      */
-    public function test_add_videojs_header()
+    public function test_enqueue_scripts()
     {
-        $expected = file_get_contents(TEST_FIXTURE_DIR.'/videojs_header.html');
-        $actual = get_echo(array(&$this->videojsplayer, 'add_videojs_header'));
-        $this->assertEquals($expected, "$actual\n");
+        $this->videojsplayer->enqueue_scripts();
+
+        $ver = get_bloginfo( 'version' );
+
+        $expected  = "<script type='text/javascript' src='//vjs.zencdn.net/4.0/video.js?ver=$ver'></script>\n";
+        $this->assertEquals($expected, get_echo('wp_print_scripts'));
+
+        $expected  = "<link rel='stylesheet' id='videojs-css'  href='//vjs.zencdn.net/4.0/video-js.css?ver=$ver' type='text/css' media='all' />\n";
+        $this->assertEquals($expected, get_echo('wp_print_styles'));
     }
 
     /**
