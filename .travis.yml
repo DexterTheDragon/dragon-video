@@ -27,6 +27,7 @@ before_install:
 
 # Grab the setup script and execute
 before_script:
+    - composer self-update
     - composer install --dev --no-interaction
     - wget https://raw.github.com/tierra/wordpress-plugin-tests/setup/setup.sh
     - source setup.sh
