@@ -178,10 +178,10 @@ class ZencoderEncoderTests extends WP_UnitTestCase
 
         $this->zencoderencoder->zencoder = $stub;
 
-        $z = $this->zencoderencoder;
-        $actual = get_echo(array(&$z, '_handle_incoming_video'), array($token));
-        $expected = "Saved $attachment_id-webm-small to /var/www/wordpress/wp-content/uploads/video-480x320.webm
-Saved poster /var/www/wordpress/wp-content/uploads/video-480x320-0.png
+        $uploads = wp_upload_dir();
+        $actual = get_echo(array(&$this->zencoderencoder, '_handle_incoming_video'), array($token));
+        $expected = "Saved $attachment_id-webm-small to {$uploads['basedir']}/video-480x320.webm
+Saved poster {$uploads['basedir']}/video-480x320-0.png
 ";
         $this->assertEquals($expected, $actual);
         unset($_SERVER['REQUEST_METHOD']);
