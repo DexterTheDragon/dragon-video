@@ -4,7 +4,7 @@ require dirname(__FILE__).'/../lib/DragonVideo.php';
 /**
  *
  */
-class DragonVideoTests extends WP_UnitTestCase
+class DragonVideoTest extends WP_UnitTestCase
 {
 
     public function setUp()
@@ -52,7 +52,7 @@ class DragonVideoTests extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::DragonVideo
+     * @covers DragonVideo::__construct
      * @covers DragonVideo::pluginInit
      */
     public function test_pluginInit()
@@ -271,9 +271,9 @@ class DragonVideoTests extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::make_encodings
+     * @covers DragonVideo::getSizeMetadata
      */
-    public function test_make_encodings()
+    public function test_getSizeMetadata()
     {
         $expected = array(
             'width'  => 720,
@@ -286,7 +286,7 @@ class DragonVideoTests extends WP_UnitTestCase
             'poster' => '',
         );
 
-        $actual = $this->dragonvideo->make_encodings(null, null, 'video.flv', 720, 480, null);
+        $actual = $this->dragonvideo->getSizeMetadata('video.flv', 720, 480, null);
         $this->assertEquals($expected, $actual);
     }
 

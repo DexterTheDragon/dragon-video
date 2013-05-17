@@ -15,7 +15,7 @@ class ZencoderEncoder {
         'ogv'  => 'theora',
     );
 
-    function ZencoderEncoder($zencoder_class = 'Services_Zencoder') {
+    function __construct($zencoder_class = 'Services_Zencoder') {
         $this->NOTIFICATION_URL = get_option('siteurl') .'/zencoder/'. get_option('zencoder_token');
         $this->options = get_option('zencoder_options', $this->options);
         $this->zencoder = new $zencoder_class($this->options['api_key']);
@@ -166,15 +166,7 @@ class ZencoderEncoder {
         }
 
         try {
-            $encoding_job = $this->zencoder->jobs->create($job);
-
-            // foreach ( $encoding_job->outputs as $o ) {
-                // add_option("zencoder_job_{$o->id}", array(
-                    // 'attachment_id' => $attachment_id,
-                    // 'size' => $o->label,
-                // ));
-            // }
-
+            $this->zencoder->jobs->create($job);
             return true;
         } catch (Services_Zencoder_Exception $e) {
             return false;

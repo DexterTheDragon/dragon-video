@@ -29,7 +29,7 @@ class DragonVideo {
         'override_gallery' => true,
     );
 
-    function DragonVideo() {
+    function __construct() {
         $this->options = get_option('dragon-video', $this->options);
     }
 
@@ -88,7 +88,7 @@ class DragonVideo {
         }
 
         $size = 'original';
-        $resized = $this->make_encodings($size, $attachment_id, $file, (int)$metadata['width'], (int)$metadata['height'], false);
+        $resized = $this->getSizeMetadata($file, (int)$metadata['width'], (int)$metadata['height'], false);
         if ( $resized )
             $metadata['sizes'][$size] = $resized;
 
@@ -104,7 +104,7 @@ class DragonVideo {
                 continue;
             list($dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h) = $dims;
 
-            $resized = $this->make_encodings($size, $attachment_id, $file, $dst_w, $dst_h, $crop);
+            $resized = $this->getSizeMetadata($file, $dst_w, $dst_h, $crop);
             if ( $resized )
                 $metadata['sizes'][$size] = $resized;
         }
@@ -113,7 +113,7 @@ class DragonVideo {
         return $metadata;
     }
 
-    function make_encodings($size, $attachment_id, $file, $width, $height, $crop) {
+    function getSizeMetadata($file, $width, $height, $crop) {
         $info = pathinfo($file);
         $dir = $info['dirname'];
         $ext = $info['extension'];
@@ -135,12 +135,12 @@ class DragonVideo {
         return $meta;
     }
 
-    function delete_attachment($postid) {
-        if ( !$this->is_video($postid) ) {
+    function delete_attachment($attachment_id) {
+        if ( !$this->is_video($attachment_id) ) {
             return;
         }
-        $src = get_attached_file($postid);
-        $metadata = wp_get_attachment_metadata($postid);
+        $src = get_attached_file($attachment_id);
+        $metadata = wp_get_attachment_metadata($attachment_id);
         foreach ( $metadata['sizes'] as $size ) {
             $dir = dirname($src);
             if ( !empty($size['poster']) ) {
@@ -157,16 +157,16 @@ class DragonVideo {
         }
     }
 
-    function is_video($post_id) {
-        $file = get_attached_file($post_id);
+    function is_video($attachment_id) {
+        $file = get_attached_file($attachment_id);
 
         $ext = preg_match('/\.([^.]+)$/', $file, $matches) ? strtolower($matches[1]) : false;
 
         $video_exts = array('ogg', 'mp4', 'flv', 'avi', 'wmv', 'm4v', 'mov', 'ogv');
 
         if ( in_array($ext, $video_exts)  ||
-            0 === strpos(get_post_mime_type($post_id), 'video/') ||
-            0 === strpos(get_post_mime_type($post_id), 'application/octet-stream'))
+            0 === strpos(get_post_mime_type($attachment_id), 'video/') ||
+            0 === strpos(get_post_mime_type($attachment_id), 'application/octet-stream'))
             return true;
         return false;
     }
@@ -229,7 +229,6 @@ HTML;
     function tag_replace($attr) {
         if ( !$post = get_post($attr[0]) )
             return "Video $attr[0] Not Found";
-        $post = get_post($attr[0]);
         $size = 'medium';
         if ( isset($attr['size']) ) {
             $size = $attr['size'];
@@ -283,8 +282,8 @@ HTML;
         return array_keys($this->options['sizes']);
     }
 
-    function get_video_for_size($post_id, $size='medium') {
-        if ( !is_array( $imagedata = wp_get_attachment_metadata( $post_id ) ) )
+    function get_video_for_size($attachment_id, $size='medium') {
+        if ( !is_array( $imagedata = wp_get_attachment_metadata( $attachment_id ) ) )
             return false;
 
         if ( in_array($size, array_keys($imagedata['sizes'])) )
@@ -422,9 +421,9 @@ HTML;
         return $output;
     }
 
-    function wp_get_attachment_link($string, $id, $size, $permalink, $icon, $text) {
+    function wp_get_attachment_link($html, $id, $size, $permalink, $icon, $text) {
         if ( !$this->is_video($id) ) {
-            return $string;
+            return $html;
         }
 
         $_post = & get_post( $id );

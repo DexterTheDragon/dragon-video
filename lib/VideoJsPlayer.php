@@ -1,7 +1,7 @@
 <?php
 class VideoJsPlayer {
 
-    function VideoJsPlayer() {
+    function __construct() {
         add_action( 'wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
         add_filter('dragon_video_player', array(&$this, 'show_video'), 10, 2);
     }

@@ -4,7 +4,7 @@ require dirname(__FILE__).'/../lib/VideoJsPlayer.php';
 /**
  *
  */
-class VideoJsPlayerTests extends WP_UnitTestCase
+class VideoJsPlayerTest extends WP_UnitTestCase
 {
 
     public function setUp()
@@ -14,7 +14,7 @@ class VideoJsPlayerTests extends WP_UnitTestCase
     }
 
     /**
-     * @covers VideoJsPlayer::VideoJsPlayer
+     * @covers VideoJsPlayer::__construct
      */
     public function test_filter_setup()
     {

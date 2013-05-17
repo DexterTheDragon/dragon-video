@@ -11,7 +11,7 @@ class ZencoderEncoderTestWrapper extends ZencoderEncoder {
 /**
  *
  */
-class ZencoderEncoderTests extends WP_UnitTestCase
+class ZencoderEncoderTest extends WP_UnitTestCase
 {
 
     public function setUp()
@@ -21,7 +21,7 @@ class ZencoderEncoderTests extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::ZencoderEncoder
+     * @covers ZencoderEncoder::__construct
      */
     public function test_construct()
     {
