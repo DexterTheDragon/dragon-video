@@ -85,7 +85,7 @@ class ZencoderEncoder {
                 require_once(ABSPATH . 'wp-admin/includes/file.php');
                 $notification = $this->zencoder->notifications->parseIncoming();
                 foreach ( $notification->job->outputs as $output ) {
-                    $label = split('-', $output->label);
+                    $label = explode('-', $output->label);
                     $attachment_id = $label[0];
                     $format = $label[1];
                     $size = $label[2];
