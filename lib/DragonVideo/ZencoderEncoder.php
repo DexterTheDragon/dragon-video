@@ -1,5 +1,7 @@
 <?php
-require dirname(__FILE__).'/../vendor/autoload.php';
+namespace DragonVideo;
+use \Services_Zencoder_Exception;
+
 class ZencoderEncoder
 {
 

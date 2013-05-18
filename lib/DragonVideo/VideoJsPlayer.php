@@ -1,10 +1,12 @@
 <?php
+namespace DragonVideo;
+
 class VideoJsPlayer
 {
 
     public function __construct()
     {
-        add_action( 'wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
+        add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
         add_filter('dragon_video_player', array(&$this, 'show_video'), 10, 2);
     }
 
@@ -45,5 +47,4 @@ class VideoJsPlayer
 HTML;
         return $html;
     }
-
 }

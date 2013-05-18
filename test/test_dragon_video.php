@@ -1,5 +1,5 @@
 <?php
-require dirname(__FILE__).'/../lib/DragonVideo.php';
+use DragonVideo\DragonVideo;
 
 /**
  *
@@ -52,8 +52,8 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::__construct
-     * @covers DragonVideo::pluginInit
+     * @covers DragonVideo\DragonVideo::__construct
+     * @covers DragonVideo\DragonVideo::pluginInit
      */
     public function test_pluginInit()
     {
@@ -80,7 +80,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::activate
+     * @covers DragonVideo\DragonVideo::activate
      */
     public function test_option_defaults()
     {
@@ -105,7 +105,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::admin_menu
+     * @covers DragonVideo\DragonVideo::admin_menu
      */
     public function test_admin_menu()
     {
@@ -119,11 +119,11 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::video_metadata
+     * @covers DragonVideo\DragonVideo::video_metadata
      */
     public function test_video_metadata_returns_if_not_a_video_()
     {
-        $stub = $this->getMock('DragonVideo', array('is_video'));
+        $stub = $this->getMock('DragonVideo\DragonVideo', array('is_video'));
         $stub->expects($this->once())
             ->method('is_video')
             ->will($this->returnValue(false));
@@ -143,7 +143,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::video_metadata
+     * @covers DragonVideo\DragonVideo::video_metadata
      */
     public function test_video_metadata_returns_the_metadata_for_resized_videos()
     {
@@ -174,7 +174,7 @@ class DragonVideoTest extends WP_UnitTestCase
                 ),
             ),
         );
-        $stub = $this->getMock('DragonVideo', array('get_video_info'));
+        $stub = $this->getMock('DragonVideo\DragonVideo', array('get_video_info'));
         $stub->expects($this->once())
             ->method('get_video_info')
             ->will($this->returnValue(array('width' => 720, 'height' => 480, 'duration' => 4)));
@@ -193,7 +193,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::get_video_info
+     * @covers DragonVideo\DragonVideo::get_video_info
      */
     public function test_get_video_info()
     {
@@ -206,7 +206,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::is_video
+     * @covers DragonVideo\DragonVideo::is_video
      */
     public function test_is_video_returns_true_for_known_video_types()
     {
@@ -223,7 +223,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::is_video
+     * @covers DragonVideo\DragonVideo::is_video
      */
     public function test_is_video_returns_false_for_unknown_types()
     {
@@ -240,7 +240,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::is_video
+     * @covers DragonVideo\DragonVideo::is_video
      */
     public function test_is_video_returns_true_for_video_mime_types()
     {
@@ -258,7 +258,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::get_video_sizes
+     * @covers DragonVideo\DragonVideo::get_video_sizes
      */
     public function test_get_video_sizes()
     {
@@ -271,7 +271,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::getSizeMetadata
+     * @covers DragonVideo\DragonVideo::getSizeMetadata
      */
     public function test_getSizeMetadata()
     {
@@ -291,11 +291,11 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::delete_attachment
+     * @covers DragonVideo\DragonVideo::delete_attachment
      */
     public function test_delete_attachment_returns_if_not_video()
     {
-        $stub = $this->getMock('DragonVideo', array('is_video'));
+        $stub = $this->getMock('DragonVideo\DragonVideo', array('is_video'));
         $stub->expects($this->once())
             ->method('is_video')
             ->will($this->returnValue(false));
@@ -305,7 +305,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::delete_attachment
+     * @covers DragonVideo\DragonVideo::delete_attachment
      */
     public function test_delete_attachment()
     {
@@ -338,7 +338,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::video_embed
+     * @covers DragonVideo\DragonVideo::video_embed
      */
     public function test_video_embed()
     {
@@ -360,7 +360,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::tag_replace
+     * @covers DragonVideo\DragonVideo::tag_replace
      */
     public function test_tag_replace_returns_video_not_found()
     {
@@ -369,13 +369,13 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::tag_replace
+     * @covers DragonVideo\DragonVideo::tag_replace
      */
     public function test_tag_replace_uses_default_size()
     {
         $this->create_attachment();
         $post = get_post($this->attachment_id);
-        $stub = $this->getMock('DragonVideo', array('video_embed'));
+        $stub = $this->getMock('DragonVideo\DragonVideo', array('video_embed'));
         $stub->expects($this->once())
             ->method('video_embed')
             ->with($post, 'medium')
@@ -385,13 +385,13 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::tag_replace
+     * @covers DragonVideo\DragonVideo::tag_replace
      */
     public function test_tag_replace_uses_requested_size()
     {
         $this->create_attachment();
         $post = get_post($this->attachment_id);
-        $stub = $this->getMock('DragonVideo', array('video_embed'));
+        $stub = $this->getMock('DragonVideo\DragonVideo', array('video_embed'));
         $stub->expects($this->once())
             ->method('video_embed')
             ->with($post, 'small')
@@ -401,7 +401,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::video_send_to_editor_shortcode
+     * @covers DragonVideo\DragonVideo::video_send_to_editor_shortcode
      */
     public function test_video_send_to_editor_shortcode_returns_html_when_not_a_video()
     {
@@ -411,7 +411,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::video_send_to_editor_shortcode
+     * @covers DragonVideo\DragonVideo::video_send_to_editor_shortcode
      */
     public function test_video_send_to_editor_shortcode_returns_shortcode()
     {
@@ -422,7 +422,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::show_video_fields_to_edit
+     * @covers DragonVideo\DragonVideo::show_video_fields_to_edit
      */
     public function test_show_video_fields_to_edit_returns_fields_when_not_a_video()
     {
@@ -434,7 +434,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::show_video_fields_to_edit
+     * @covers DragonVideo\DragonVideo::show_video_fields_to_edit
      */
     public function test_show_video_fields_to_edit_returns_fields()
     {
@@ -453,7 +453,7 @@ class DragonVideoTest extends WP_UnitTestCase
             ),
         );
 
-        $stub = $this->getMock('DragonVideo', array('video_embed'));
+        $stub = $this->getMock('DragonVideo\DragonVideo', array('video_embed'));
         $stub->expects($this->once())
             ->method('video_embed')
             ->with($post, 'medium')
@@ -464,7 +464,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::get_video_for_size
+     * @covers DragonVideo\DragonVideo::get_video_for_size
      */
     public function test_get_video_for_size_returns_false_when_metadata_blank()
     {
@@ -473,7 +473,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::get_video_for_size
+     * @covers DragonVideo\DragonVideo::get_video_for_size
      */
     public function test_get_video_for_size_returns_the_size_when_available()
     {
@@ -483,7 +483,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::get_video_for_size
+     * @covers DragonVideo\DragonVideo::get_video_for_size
      */
     public function test_get_video_for_size_returns_size_if_only_one_available()
     {
@@ -503,7 +503,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::get_video_for_size
+     * @covers DragonVideo\DragonVideo::get_video_for_size
      */
     public function test_get_video_for_size_returns_the_closest_match()
     {
@@ -527,7 +527,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::get_video_for_size
+     * @covers DragonVideo\DragonVideo::get_video_for_size
      */
     public function test_get_video_for_size_returns_original_size_as_fallback()
     {
@@ -538,7 +538,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::get_video_for_size
+     * @covers DragonVideo\DragonVideo::get_video_for_size
      */
     public function test_get_video_for_size_returns_fails_on_unknown_sizes()
     {
@@ -551,7 +551,7 @@ class DragonVideoTest extends WP_UnitTestCase
 
     /**
      * TODO: This is to make phpunit code coverage happy, should probably refactor the method
-     * @covers DragonVideo::get_video_for_size
+     * @covers DragonVideo\DragonVideo::get_video_for_size
      */
     public function test_get_video_for_size_returns_null()
     {
@@ -567,7 +567,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::video_gallery
+     * @covers DragonVideo\DragonVideo::video_gallery
      */
     public function test_video_gallery()
     {
@@ -575,7 +575,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::wp_get_attachment_link
+     * @covers DragonVideo\DragonVideo::wp_get_attachment_link
      */
     public function test_wp_get_attachment_link_returns_passed_string_when_not_video()
     {
@@ -585,7 +585,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::wp_get_attachment_link
+     * @covers DragonVideo\DragonVideo::wp_get_attachment_link
      */
     public function test_wp_get_attachment_link_uses_passed_link_text()
     {
@@ -597,7 +597,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::wp_get_attachment_link
+     * @covers DragonVideo\DragonVideo::wp_get_attachment_link
      */
     public function test_wp_get_attachment_link_returns_permalink()
     {
@@ -610,7 +610,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::wp_get_attachment_link
+     * @covers DragonVideo\DragonVideo::wp_get_attachment_link
      */
     public function test_wp_get_attachment_link_defaults_to_post_title()
     {
@@ -622,7 +622,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::wp_get_attachment_link
+     * @covers DragonVideo\DragonVideo::wp_get_attachment_link
      */
     public function test_wp_get_attachment_link_returns_html5_video()
     {
@@ -634,7 +634,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::options_page
+     * @covers DragonVideo\DragonVideo::options_page
      */
     public function test_options_page()
     {
@@ -648,7 +648,7 @@ class DragonVideoTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers DragonVideo::encode_formats
+     * @covers DragonVideo\DragonVideo::encode_formats
      */
     public function test_encode_formats()
     {

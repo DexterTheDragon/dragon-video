@@ -1,5 +1,5 @@
 <?php
-require dirname(__FILE__).'/../lib/VideoJsPlayer.php';
+use DragonVideo\VideoJsPlayer;
 
 /**
  *
@@ -14,7 +14,7 @@ class VideoJsPlayerTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers VideoJsPlayer::__construct
+     * @covers DragonVideo\VideoJsPlayer::__construct
      */
     public function test_filter_setup()
     {
@@ -23,7 +23,7 @@ class VideoJsPlayerTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers VideoJsPlayer::enqueue_scripts
+     * @covers DragonVideo\VideoJsPlayer::enqueue_scripts
      */
     public function test_enqueue_scripts()
     {
@@ -39,7 +39,7 @@ class VideoJsPlayerTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers VideoJsPlayer::show_video
+     * @covers DragonVideo\VideoJsPlayer::show_video
      */
     public function test_show_video()
     {

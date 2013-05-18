@@ -10,7 +10,8 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 # TODO: Link on page to re-convert video
-require 'lib/DragonVideo.php';
+require_once __DIR__.'/vendor/autoload.php';
+use DragonVideo\DragonVideo;
 
 $dragonvideo = new DragonVideo();
 $dragonvideo->pluginInit(__FILE__);

@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "c031de19741572bd843185708abb420e",
+    "hash": "30921dd19ba1459364132ddd0a43f4ec",
     "packages": [
         {
             "name": "zencoder/zencoder-php",

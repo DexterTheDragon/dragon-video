@@ -1,7 +1,5 @@
 <?php
-require_once dirname(__FILE__).'/../lib/DragonVideo.php';
-require dirname(__FILE__).'/../lib/ZencoderEncoder.php';
-require dirname(__FILE__).'/../vendor/autoload.php';
+use DragonVideo\ZencoderEncoder;
 
 class ZencoderEncoderTestWrapper extends ZencoderEncoder {
     public function handle_incoming_video($token) {
@@ -21,7 +19,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::__construct
+     * @covers DragonVideo\ZencoderEncoder::__construct
      */
     public function test_construct()
     {
@@ -32,7 +30,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::pluginInit
+     * @covers DragonVideo\ZencoderEncoder::pluginInit
      */
     public function test_pluginInit()
     {
@@ -56,7 +54,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::activate
+     * @covers DragonVideo\ZencoderEncoder::activate
      */
     public function test_option_defaults()
     {
@@ -71,7 +69,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::admin_menu
+     * @covers DragonVideo\ZencoderEncoder::admin_menu
      */
     public function test_admin_menu()
     {
@@ -93,7 +91,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::insert_rewrite_rules
+     * @covers DragonVideo\ZencoderEncoder::insert_rewrite_rules
      */
     public function test_insert_rewrite_rules()
     {
@@ -106,7 +104,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::insert_query_vars
+     * @covers DragonVideo\ZencoderEncoder::insert_query_vars
      */
     public function test_insert_query_vars()
     {
@@ -116,7 +114,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::do_page_redirect
+     * @covers DragonVideo\ZencoderEncoder::do_page_redirect
      */
     public function test_do_page_redirect()
     {
@@ -137,7 +135,7 @@ class ZencoderEncoderTest extends WP_UnitTestCase
     }
 
     /**
-     * @covers ZencoderEncoder::handle_incoming_video
+     * @covers DragonVideo\ZencoderEncoder::handle_incoming_video
      */
     public function test_handle_incoming_video()
     {
@@ -203,7 +201,7 @@ Saved poster {$uploads['basedir']}/video-480x320-0.png
     }
 
     /**
-     * @covers ZencoderEncoder::handle_incoming_video
+     * @covers DragonVideo\ZencoderEncoder::handle_incoming_video
      */
     public function test_handle_incoming_video_error_message()
     {
@@ -216,7 +214,7 @@ Saved poster {$uploads['basedir']}/video-480x320-0.png
     }
 
     /**
-     * @covers ZencoderEncoder::make_encodings
+     * @covers DragonVideo\ZencoderEncoder::make_encodings
      */
     public function test_make_encodings_returns_true_and_sets_outputs()
     {
@@ -313,7 +311,7 @@ Saved poster {$uploads['basedir']}/video-480x320-0.png
     }
 
     /**
-     * @covers ZencoderEncoder::make_encodings
+     * @covers DragonVideo\ZencoderEncoder::make_encodings
      */
     public function test_make_encodings_returns_false()
     {
@@ -327,7 +325,7 @@ Saved poster {$uploads['basedir']}/video-480x320-0.png
     }
 
     /**
-     * @covers ZencoderEncoder::options_page
+     * @covers DragonVideo\ZencoderEncoder::options_page
      */
     public function test_options_page()
     {

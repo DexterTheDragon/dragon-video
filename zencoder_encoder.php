@@ -9,7 +9,8 @@ Version: 0.9.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
-require 'lib/ZencoderEncoder.php';
+require_once __DIR__.'/vendor/autoload.php';
+use DragonVideo\ZencoderEncoder;
 
 $zencoderencoder = new ZencoderEncoder;
 $zencoderencoder->pluginInit(__FILE__);

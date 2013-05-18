@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Services_Zencoder' => array($vendorDir . '/zencoder/zencoder-php'),
+    'DragonVideo' => array($baseDir . '/lib'),
 );
