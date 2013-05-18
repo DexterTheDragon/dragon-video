@@ -1,6 +1,9 @@
 <?php
-require_once dirname(__FILE__).'/../vendor/autoload.php';
-require 'helper.php';
+require_once __DIR__.'/../vendor/autoload.php';
+
+foreach( glob(__DIR__.'/helpers/*.php') as $file ) {
+    require $file;
+}
 
 define('TEST_FIXTURE_DIR', __DIR__ . '/fixtures');
 
@@ -15,7 +18,7 @@ define('TEST_FIXTURE_DIR', __DIR__ . '/fixtures');
 
 // Add this plugin to WordPress for activation so it can be tested.
 // $GLOBALS['wp_tests_options'] = array(
-	// 'active_plugins' => array( "dragon-video/video.php"),
+    // 'active_plugins' => array( "dragon-video/video.php"),
 // );
 
 // If the wordpress-tests repo location has been customized (and specified
@@ -25,8 +28,8 @@ define('TEST_FIXTURE_DIR', __DIR__ . '/fixtures');
 // Otherwise, we'll just assume that this plugin is installed in the WordPress
 // SVN external checkout configured in the wordpress-tests repo.
 
-if( false !== getenv( 'WP_TESTS_DIR' ) ) {
-	require getenv( 'WP_TESTS_DIR' ) . '/includes/bootstrap.php';
+if ( false !== getenv('WP_TESTS_DIR') ) {
+    require getenv('WP_TESTS_DIR') . '/includes/bootstrap.php';
 } else {
-	require dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/includes/bootstrap.php';
+    require dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/includes/bootstrap.php';
 }

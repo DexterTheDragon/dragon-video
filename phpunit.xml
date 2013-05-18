@@ -7,7 +7,7 @@
     <testsuites>
         <!-- Default test suite to run all tests -->
         <testsuite>
-            <directory prefix="test_" suffix=".php">test</directory>
+            <directory suffix="Test.php">test</directory>
         </testsuite>
     </testsuites>
     <filter>
