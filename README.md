@@ -1,7 +1,8 @@
 Dragon Video
 ============
 [![Build Status](https://travis-ci.org/DexterTheDragon/dragon-video.png?branch=master)](https://travis-ci.org/DexterTheDragon/dragon-video)
-[![Coverage Status](https://coveralls.io/repos/DexterTheDragon/dragon-video/badge.png)](https://coveralls.io/r/DexterTheDragon/dragon-video)
+[![Coverage Status](https://coveralls.io/repos/DexterTheDragon/dragon-video/badge.png?branch=master)](https://coveralls.io/r/DexterTheDragon/dragon-video?branch=master)
+[![Dependency Status](http://www.versioneye.com/user/projects/51da1e9eb3745b000201b63a/badge.png)](http://www.versioneye.com/user/projects/51da1e9eb3745b000201b63a)
 
 A WordPress plugin for converting uploaded videos to HTML5 format (h264,
 webm, ogv) and displaying them with the \<video> tag.
