@@ -1,0 +1,47 @@
+[
+    {
+        "name": "zencoder/zencoder-php",
+        "version": "v2.1.2",
+        "version_normalized": "2.1.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/zencoder/zencoder-php.git",
+            "reference": "v2.1.2"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/zencoder/zencoder-php/zipball/v2.1.2",
+            "reference": "v2.1.2",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.2.0"
+        },
+        "time": "2013-02-27 21:27:43",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "Services_Zencoder": ""
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Zencoder",
+                "homepage": "http://zencoder.com"
+            }
+        ],
+        "description": "Zencoder integration library for PHP",
+        "homepage": "http://github.com/zencoder/zencoder-php",
+        "keywords": [
+            "cloud",
+            "encoder",
+            "encoding",
+            "zencoder"
+        ]
+    }
+]
