@@ -1,11 +1,21 @@
 {
+    "name": "dexterthedragon/dragon-video",
+    "description": "A WordPress plugin for converting uploaded videos to HTML5 format (h264, webm, ogv) and displaying them with the <video> tag.",
+    "homepage": "https://github.com/DexterTheDragon/dragon-video",
+    "license": "GPL-2.0+",
+    "authors": [
+        {
+            "name": "Kevin Carter",
+            "email": "cartkev@gmail.com"
+        }
+    ],
     "require": {
         "zencoder/zencoder-php": "v2.1.2"
     },
-    "autoload": {
-        "psr-0": {"DragonVideo": "lib/"}
-    },
     "require-dev": {
         "satooshi/php-coveralls": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {"DragonVideo": "lib/"}
     }
 }
