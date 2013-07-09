@@ -31,10 +31,10 @@ class VideoJsPlayerTest extends WP_UnitTestCase
 
         $ver = get_bloginfo( 'version' );
 
-        $expected  = "<script type='text/javascript' src='//vjs.zencdn.net/4.0/video.js?ver=$ver'></script>\n";
+        $expected  = "<script type='text/javascript' src='http://example.org/wp-content/plugins/dragon-video/video-js/video.js?ver=$ver'></script>\n";
         $this->assertEquals($expected, get_echo('wp_print_scripts'));
 
-        $expected  = "<link rel='stylesheet' id='videojs-css'  href='//vjs.zencdn.net/4.0/video-js.css?ver=$ver' type='text/css' media='all' />\n";
+        $expected  = "<link rel='stylesheet' id='videojs-css'  href='http://example.org/wp-content/plugins/dragon-video/video-js/video-js.min.css?ver=$ver' type='text/css' media='all' />\n";
         $this->assertEquals($expected, get_echo('wp_print_styles'));
     }
 

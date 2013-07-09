@@ -8,12 +8,13 @@ class VideoJsPlayer
     {
         add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
         add_filter('dragon_video_player', array(&$this, 'show_video'), 10, 2);
+        $this->script_url = plugin_dir_url(realpath(dirname(__FILE__).'/../')).'video-js';
     }
 
     public function enqueue_scripts()
     {
-        wp_enqueue_script('videojs', '//vjs.zencdn.net/4.0/video.js');
-        wp_enqueue_style('videojs', '//vjs.zencdn.net/4.0/video-js.css');
+        wp_enqueue_script('videojs', $this->script_url.'/video.js');
+        wp_enqueue_style('videojs', $this->script_url.'/video-js.min.css');
     }
 
     public function show_video($html, $video)
