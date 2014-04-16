@@ -31,7 +31,7 @@ Requirements
 ------------
 
 FFmpeg is required on the server in order to read video metadata. Video
-encoding does not really on FFmpeg.
+encoding does not rely on FFmpeg.
 
 How it works
 ------------
